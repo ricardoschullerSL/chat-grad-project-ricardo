@@ -1,9 +1,9 @@
 module.exports = function(grunt) {
-    grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.loadNpmTasks("grunt-jshint-react");
-    grunt.loadNpmTasks("grunt-jscs");
-    grunt.loadNpmTasks("grunt-mocha-test");
-    grunt.loadNpmTasks("grunt-mocha-istanbul");
+    // grunt.loadNpmTasks("grunt-contrib-jshint");
+    // grunt.loadNpmTasks("grunt-jshint-react");
+    // grunt.loadNpmTasks("grunt-jscs");
+    // grunt.loadNpmTasks("grunt-mocha-test");
+    // grunt.loadNpmTasks("grunt-mocha-istanbul");
 
     var files = ["Gruntfile.js", "server.js", "server/**/*.js", "test/**/*.js", "public/**/*.js", "!public/client.min.js"];
     var artifactsLocation = "build_artifacts";
