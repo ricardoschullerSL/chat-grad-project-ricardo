@@ -1,4 +1,19 @@
-(function() {
+import "babel-polyfill";
+import React from "react";
+import ReactDOM from "react-dom";
+import {Route, IndexRoute, MemoryRouter } from "react-router";
+import Layout from "./components/Layout";
+import { Provider } from "react-redux"
+
+import store from "./store"
+
+const app = document.getElementById("app");
+
+ReactDOM.render(<Provider store={store}>
+    <Layout /></Provider>, app);
+
+
+/*(function() {
     var app = angular.module("ChatApp", []);
 
     app.controller("ChatController", function($scope, $http) {
@@ -17,3 +32,4 @@
         });
     });
 })();
+*/

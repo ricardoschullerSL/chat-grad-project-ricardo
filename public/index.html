@@ -3,19 +3,8 @@
     <head>
         <meta charset="utf-8">
         <title>Chat</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
-        <script src="js/main.js"></script>
-    </head>
-    <body ng-controller="ChatController">
-        <a ng-show="!loggedIn" href="{{loginUri}}">Log in</a>
-        <section ng-show="loggedIn">
-            <p>Logged in as {{user.name}}.</p>
-            <h2>List of registered users</h2>
-            <ul>
-                <li ng-repeat="user in users">
-                    {{user.name}}
-                </li>
-            </ul>
-        </section>
+        </head>
+    <div id="app"></div>
+    <script src="client.min.js"></script>
     </body>
 </html>
