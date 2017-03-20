@@ -1,21 +1,22 @@
 module.exports = function(grunt) {
     // grunt.loadNpmTasks("grunt-contrib-jshint");
     // grunt.loadNpmTasks("grunt-jshint-react");
-    // grunt.loadNpmTasks("grunt-jscs");
-    // grunt.loadNpmTasks("grunt-mocha-test");
-    // grunt.loadNpmTasks("grunt-mocha-istanbul");
+    grunt.loadNpmTasks("grunt-jscs");
+    grunt.loadNpmTasks("grunt-mocha-test");
+    grunt.loadNpmTasks("grunt-mocha-istanbul");
 
-    var files = ["Gruntfile.js", "server.js", "server/**/*.js", "test/**/*.js", "public/**/*.js", "!public/client.min.js"];
+    var files = ["Gruntfile.js", "server.js", "server/**/*.js", "test/**/*.js",
+                "public/**/*.js", "!public/client.min.js"];
     var artifactsLocation = "build_artifacts";
 
     grunt.initConfig({
-        jshint: {
-            all: files,
-            options: {
-                jshintrc: true,
-                additionalSuffixes: [".js"]
-            }
-        },
+        // jshint: {
+        //     all: files,
+        //     options: {
+        //         jshintrc: true,
+        //         additionalSuffixes: [".js"]
+        //     }
+        // },
         jscs: {
             all: files
         },
@@ -71,8 +72,8 @@ module.exports = function(grunt) {
         });
     });
 
-    grunt.registerTask("check", ["jshint", "jscs"]);
-    grunt.registerTask("test", ["check", "mochaTest", "mocha_istanbul", "istanbul_report",
+    // grunt.registerTask("check", ["jshint", "jscs"]);
+    grunt.registerTask("test", ["mochaTest", "mocha_istanbul", "istanbul_report",
         "istanbul_check_coverage"]);
     grunt.registerTask("default", "test");
 };

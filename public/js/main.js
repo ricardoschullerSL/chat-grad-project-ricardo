@@ -1,11 +1,11 @@
 import "babel-polyfill";
 import React from "react";
 import ReactDOM from "react-dom";
-import {Route, IndexRoute, MemoryRouter } from "react-router";
+// import {Route, IndexRoute, MemoryRouter } from "react-router";
 import Layout from "./components/Layout";
-import { Provider } from "react-redux"
+import { Provider } from "react-redux";
 
-import store from "./store"
+import store from "./store";
 
 const app = document.getElementById("app");
 

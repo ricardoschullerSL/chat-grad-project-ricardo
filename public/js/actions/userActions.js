@@ -1,4 +1,3 @@
-import fetch from "isomorphic-fetch";
 import axios from "axios";
 
 export function fetchUser() {
@@ -8,38 +7,57 @@ export function fetchUser() {
             name: "Ricardo",
             age: 26,
         }
-    }
+    };
 }
 
 export function setUserName(name) {
     return {
         type: "SET_USER_NAME",
         payload: name,
-    }
+    };
 }
 
 export function setUserAge(age) {
     return {
         type: "SET_USER_AGE",
         payload: age,
-    }
+    };
 }
 
 export function setUsers(users) {
     return {
         type: "SET_USERS",
         payload: users
-    }
+    };
 }
 
 export function userOath() {
     console.log("Authentication started...");
     return function(dispatch) {
-    fetch.get("localhost:9090/api/oauth/uri").then(function(result) {
-        console.log("Something happened...");
-        dispatch({type:"SET_USER_URI", payload:result});
+        console.log("Before the GET request");
+        axios.get("/api/user")
+        .then(function(userResult) {
+            console.log("User Result is :", userResult.data);
+            dispatch({type:"SET_USER", payload: userResult.data});
         })
-    .catch((err) => {console.log("Error: ", err)});
-    console.log("End of authentication");
-    }
+        .catch((err) => {
+            console.log("Error": err);
+            axios.get("/api/oauth/uri").then(function(result) {
+                console.log("Got authentication token");
+                dispatch({type:"SET_USER_URI", payload:result.data.uri});
+            })
+            .catch((err) => {console.log("Error during uri request");});
+            console.log("End of authentication");
+        })
+    };
+}
+
+export function apiOauthUri() {
+    axios.get("/api/oauth/uri")
+    .then((result) => {
+        console.log(result);
+    })
+    .catch((err) => {
+        console.log(err);
+    })
 }

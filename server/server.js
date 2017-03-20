@@ -91,9 +91,5 @@ module.exports = function(port, db, githubAuthoriser) {
         });
     });
 
-    app.get("/api/messages", function(req, res) {
-        res.json(messages);
-    });
-
     return app.listen(port);
 };

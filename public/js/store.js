@@ -4,24 +4,7 @@ import thunk from "redux-thunk";
 
 import reducer from "./reducers";
 
-
-
-const error = (store) => (next) => (action) => {
-    try {
-        next(action);
-    } catch(e) {
-        console.log("Error!", e);
-    }
-}
-
-
-const middleWare = applyMiddleware(thunk, logger(), error);
+const middleWare = applyMiddleware(thunk, logger());
 const composeEnhancers = compose;
-export default createStore(reducer, {
-    user:{
-        id: "0",
-        name: "Ricardo",
-        uri: null,
-    },
-    }
-    ,composeEnhancers(middleWare));
+
+export default createStore(reducer, middleWare);

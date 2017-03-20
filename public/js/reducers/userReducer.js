@@ -4,8 +4,7 @@ export default function(state={
         name: null,
         age: null,
     },
-    fetching: false,
-    fetched: false,
+    uri: null,
     error: null,
 }, action) {
     switch(action.type) {
@@ -50,7 +49,7 @@ export default function(state={
         case "SET_USER_URI": {
             return {
                 ...state,
-                user: {...state.user, uri: action.payload},
+                uri: action.payload,
             }
         }
     }

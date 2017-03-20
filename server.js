@@ -5,7 +5,7 @@ var credentials = require("./MongoDB/credentials");
 
 var creds = credentials();
 
-var port = process.env.PORT || 9090;
+var port = process.env.PORT || 8080;
 var dbUri = process.env.DB_URI || creds.DB_URI;
 var oauthClientId = process.env.OAUTH_CLIENT_ID || creds.OAUTH_CLIENT_ID;
 var oauthSecret = process.env.OAUTH_SECRET || creds.OAUTH_SECRET;

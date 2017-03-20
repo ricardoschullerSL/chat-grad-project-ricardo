@@ -4,16 +4,16 @@ export default function(state={
         messages: [],
         chatID: null,
     },
-    fetching: false,
-    fetched: false,
     error: null,
 }, action) {
     switch(action.type) {
         case "FETCH_MESSAGES": {
             return {...state, fetching: true};
+            break;
         }
         case "RECEIVE_MESSAGES_REJECTED": {
             return {...state, fetching: false, error: action.payload};
+            break;
         }
         case "RECEIVE_MESSAGES_FULFILLED": {
             return {
@@ -22,6 +22,14 @@ export default function(state={
                 fetched: true,
                 chat: {...state.chat, messages: action.payload}
             }
+            break;
+        }
+        case "RECEIVE_MESSAGES": {
+            return {
+                ...state,
+                chat: {...state.chat, messages: action.payload}
+            }
+            break;
         }
     }
     return state;
