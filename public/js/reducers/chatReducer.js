@@ -1,10 +1,5 @@
 export default function(state={
-    users: {},
-    chat: {
-        messages: [],
-        chatID: null,
-    },
-    error: null,
+    messages: ["test", "hello"],
 }, action) {
     switch(action.type) {
         case "FETCH_MESSAGES": {
@@ -27,7 +22,7 @@ export default function(state={
         case "RECEIVE_MESSAGES": {
             return {
                 ...state,
-                chat: {...state.chat, messages: action.payload}
+                messages: action.payload,
             }
             break;
         }

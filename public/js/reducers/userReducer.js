@@ -1,8 +1,8 @@
 export default function(state={
     user: {
-        id: null,
+        avatarUrl: null,
+        _id: null,
         name: null,
-        age: null,
     },
     uri: null,
     error: null,

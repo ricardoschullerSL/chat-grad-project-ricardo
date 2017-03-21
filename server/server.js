@@ -4,7 +4,7 @@ var bodyParser = require("body-parser");
 
 module.exports = function(port, db, githubAuthoriser) {
     var app = express();
-    var messages = ["Hello", "These", "Are", "Messages"];
+    var messages = ["Hello", "these", "are", "messages"]
 
     app.use(bodyParser.json());
     app.use(express.static("public"));
@@ -14,7 +14,6 @@ module.exports = function(port, db, githubAuthoriser) {
     var sessions = {};
 
     app.get("/oauth", function(req, res) {
-        console.log("Authentication started");
         githubAuthoriser.authorise(req, function(githubUser, token) {
             if (githubUser) {
                 users.findOne({
@@ -44,7 +43,6 @@ module.exports = function(port, db, githubAuthoriser) {
     });
 
     app.get("/api/oauth/uri", function(req, res) {
-        console.log("Returning URI");
         res.json({
             uri: githubAuthoriser.oAuthUri
         });
@@ -90,6 +88,15 @@ module.exports = function(port, db, githubAuthoriser) {
             }
         });
     });
+
+    app.get("/api/messages", function(req, res) {
+        res.json(messages);
+    })
+
+    app.post("/api/messages", function(req, res) {
+        messages.push(req.body.message);
+        res.json(messages);
+    })
 
     return app.listen(port);
 };

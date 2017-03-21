@@ -10,7 +10,7 @@ export default class ChatWindow extends React.Component{
     render(){
         return(
             <div>
-                <MessageWindow message={this.props.message} />
+                <MessageWindow messages={this.props.messages} /><br></br>
                 <InputBox />
             </div>
         );

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { userOath, apiOauthUri } from "../actions/userActions"
+import { userOath } from "../actions/userActions";
 
 import Footer from "./Footer";
 import Header from "./Header";
@@ -9,7 +9,6 @@ import ChatWindow from "./ChatWindow";
 import { fetchMessages, receiveMessages } from "../actions/chatActions";
 import store from "../store";
 
-store.dispatch({type:"THUNK"});
 
 @connect((store) => {
     return {
@@ -18,8 +17,8 @@ store.dispatch({type:"THUNK"});
     }
 })
 export default class Layout extends React.Component{
-    constructor(){
-        super();
+    constructor(props){
+        super(props);
         store.dispatch(userOath());
         console.log("URI is set");
     }
@@ -30,9 +29,6 @@ export default class Layout extends React.Component{
         this.props.dispatch(receiveMessages());
     }
 
-    userOath() {
-        this.props.dispatch(userOath());
-    }
     render(){
         console.log("This.props" , this.props);
         console.log("This.props.user" , this.props.user);
@@ -40,12 +36,9 @@ export default class Layout extends React.Component{
             <div>
                 <Header username="Ricardo"/>
                 <ChatWindow message="Test Message" />
-                <button onClick= {this.fetchMessages.bind(this)}>
-                    Fetch Messages
-                </button>
-                <button onClick={this.receiveMessages.bind(this)}> Receive Messages</button>
-                <a href={this.props.user.uri}>Get Authenticated</a>
-                <button onClick={apiOauthUri}>API Oath Uri</button>
+                <button>
+                    <a href={this.props.user.uri}>Get Authenticated</a></button>
+                <button onClick={this.fetchMessages.bind(this)}>Fetch Messages</button>
                 <span> Error:  </span>
                 <Footer />
             </div>

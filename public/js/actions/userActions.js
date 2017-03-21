@@ -51,13 +51,3 @@ export function userOath() {
         })
     };
 }
-
-export function apiOauthUri() {
-    axios.get("/api/oauth/uri")
-    .then((result) => {
-        console.log(result);
-    })
-    .catch((err) => {
-        console.log(err);
-    })
-}
