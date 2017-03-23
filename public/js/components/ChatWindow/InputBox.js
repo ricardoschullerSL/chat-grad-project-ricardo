@@ -15,13 +15,10 @@ export default class InputBox extends React.Component {
         this.state = {value: ""};
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
-        console.log(this.send);
     }
 
     handleSubmit(event){
         event.preventDefault();
-        console.log("Default prevented?!");
-        console.log(this.state.value);
         this.props.dispatch(sendMessage(this.state.value, this.props.user.activeChatID));
         this.state = {value: ""};
     }

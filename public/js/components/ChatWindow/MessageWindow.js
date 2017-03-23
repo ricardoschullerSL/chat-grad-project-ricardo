@@ -3,7 +3,6 @@ import Message from "./Message";
 import { connect } from "react-redux";
 
 @connect((store) => {
-    console.log("Store.chat is", store.chat);
     if(store.chat.chats !== null) {
     return {
         messages: store.chat.chats.chat0.messages,
@@ -19,8 +18,8 @@ export default class MessageWindow extends React.Component{
     render(){
         if (this.props.messages !== undefined) {
             return (
-                <div>
-                    <ul>
+                <div style={{height:"600px", overflow:"auto"}}>
+                    <ul style={{listStyleType:"none"}}>
                     {this.props.messages.map((text) =>
                     <li><Message message={text} /></li>
                 )}

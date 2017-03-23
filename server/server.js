@@ -16,7 +16,6 @@ module.exports = function(port, db, githubAuthoriser) {
     app.get("/oauth", function(req, res) {
         githubAuthoriser.authorise(req, function(githubUser, token) {
             if (githubUser) {
-                console.log(githubUser);
                 users.findOne({
                     _id: githubUser.login
                 }, function(err, user) {
@@ -132,9 +131,9 @@ module.exports = function(port, db, githubAuthoriser) {
         // Return friends belonging to userID
         users.findOne({
             _id: req.params.userID
-        }, function(err, user) {
+        }, function(err, doc) {
                 if(!err) {
-                    res.json(user.friends);
+                    res.json(doc.value.friends);
                 } else {
                     console.log(err);
                     res.sendStatus(500);
@@ -151,9 +150,9 @@ module.exports = function(port, db, githubAuthoriser) {
             [["_id", 1]],
             {$push: {friends: req.body}},
             {new: true},
-            function(err, user) {
+            function(err, doc) {
                 if(!err) {
-                    res.json(user.friends);
+                    res.json(doc.value.friends);
                 } else {
                     console.log(err);
                     res.sendStatus(500);

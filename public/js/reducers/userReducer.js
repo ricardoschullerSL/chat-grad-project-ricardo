@@ -43,7 +43,7 @@ export default function(state={
         case "SET_FRIENDS": {
             return {
                 ...state,
-                user: {...state.user, friends: action.payload}
+                friends: action.payload
             }
         }
         case "SET_ERROR": {
