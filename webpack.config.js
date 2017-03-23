@@ -1,5 +1,7 @@
+
 var debug = process.env.NODE_ENV !== "production";
 var webpack = require("webpack");
+var path = require("path");
 
 module.exports = {
     context: __dirname + "/public",
@@ -27,12 +29,11 @@ module.exports = {
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false }),
     ],
-    // devServer:{
-    //     proxy: {
-    //         "/api": {
-    //             target: "http://localhost:9090/",
-    //             secure: true,
-    //         }
-    //     }
-    // }
+    devServer:{
+        proxy: {
+            "/api": {
+                target: "http://localhost:9090/",
+            }
+        }
+    }
 };

@@ -4,18 +4,19 @@ var bodyParser = require("body-parser");
 
 module.exports = function(port, db, githubAuthoriser) {
     var app = express();
-    var messages = ["Hello", "these", "are", "messages"]
 
     app.use(bodyParser.json());
     app.use(express.static("public"));
     app.use(cookieParser());
 
     var users = db.collection("users");
+    var chats = db.collection("chats");
     var sessions = {};
 
     app.get("/oauth", function(req, res) {
         githubAuthoriser.authorise(req, function(githubUser, token) {
             if (githubUser) {
+                console.log(githubUser);
                 users.findOne({
                     _id: githubUser.login
                 }, function(err, user) {
@@ -24,11 +25,15 @@ module.exports = function(port, db, githubAuthoriser) {
                         users.insertOne({
                             _id: githubUser.login,
                             name: githubUser.name,
-                            avatarUrl: githubUser.avatar_url
+                            avatarUrl: githubUser.avatar_url,
+                            friends: []
                         });
                     }
                     sessions[token] = {
-                        user: githubUser.login
+                        user: { _id: githubUser.login,
+                                name: githubUser.name,
+                                avatarUrl:githubUser.avatar_url
+                            }
                     };
                     res.cookie("sessionToken", token);
                     res.header("Location", "/");
@@ -62,8 +67,9 @@ module.exports = function(port, db, githubAuthoriser) {
     });
 
     app.get("/api/user", function(req, res) {
+        // return user info on login
         users.findOne({
-            _id: req.session.user
+            _id: req.session.user._id
         }, function(err, user) {
             if (!err) {
                 res.json(user);
@@ -74,6 +80,7 @@ module.exports = function(port, db, githubAuthoriser) {
     });
 
     app.get("/api/users", function(req, res) {
+        // return array of users registered to the server
         users.find().toArray(function(err, docs) {
             if (!err) {
                 res.json(docs.map(function(user) {
@@ -89,13 +96,71 @@ module.exports = function(port, db, githubAuthoriser) {
         });
     });
 
-    app.get("/api/messages", function(req, res) {
-        res.json(messages);
-    })
+    app.get("/api/chats/:chatID", function(req, res) {
+        // Return messages from chat with _id: chatID
+        chats.findOne({
+            _id: req.params.chatID
+        }, function (err, chat) {
+            if(!err) {
+                res.json(chat);
+            } else {
+                res.sendStatus(500);
+            }
+        });
+    });
 
-    app.post("/api/messages", function(req, res) {
-        messages.push(req.body.message);
-        res.json(messages);
+    app.post("/api/chats/:chatID", function(req, res) {
+        // Add message to chat with _id: chatID
+        chats.findAndModify(
+            { _id: req.params.chatID }, //query
+            [["_id", 1]], //sort
+            {$push: {messages: req.body.message}}, //update object
+            {new: true}, //options
+            function(err, object) { //callback
+
+                if(!err) {
+                    res.json(object.value);
+                } else {
+                    console.log(err);
+                    res.sendStatus(500);
+                }
+            }
+        );
+    });
+
+    app.get("/api/friends/:userID", function(req, res) {
+        // Return friends belonging to userID
+        users.findOne({
+            _id: req.params.userID
+        }, function(err, user) {
+                if(!err) {
+                    res.json(user.friends);
+                } else {
+                    console.log(err);
+                    res.sendStatus(500);
+                }
+            }
+        );
+    });
+
+    app.post("/api/friends/:userID", function(req, res){
+        // Add new user to userID.friends
+        console.log(req.body)
+        users.findAndModify(
+            {_id: req.params.userID},
+            [["_id", 1]],
+            {$push: {friends: req.body}},
+            {new: true},
+            function(err, user) {
+                if(!err) {
+                    res.json(user.friends);
+                } else {
+                    console.log(err);
+                    res.sendStatus(500);
+
+                }
+            }
+        );
     })
 
     return app.listen(port);

@@ -6,6 +6,7 @@ import store from "../../store";
 @connect((store) => {
     return {
         chat: store.chat,
+        user: store.user,
     }
 })
 export default class InputBox extends React.Component {
@@ -21,7 +22,7 @@ export default class InputBox extends React.Component {
         event.preventDefault();
         console.log("Default prevented?!");
         console.log(this.state.value);
-        this.props.dispatch(sendMessage(this.state.value));
+        this.props.dispatch(sendMessage(this.state.value, this.props.user.activeChatID));
         this.state = {value: ""};
     }
 

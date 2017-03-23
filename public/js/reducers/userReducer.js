@@ -1,27 +1,15 @@
 export default function(state={
     user: {
-        avatarUrl: null,
-        _id: null,
-        name: null,
+        avatarUrl: "",
+        _id: "",
+        name: "",
     },
-    uri: null,
-    error: null,
+    uri: "",
+    error: "",
+    friends: [],
+    activeChatID: "chat0",
 }, action) {
     switch(action.type) {
-        case "FETCH_USER": {
-            return {...state, fetching: true};
-        }
-        case "FETCH_USER_REJECTED": {
-            return {...state, fetching: false, error: action.payload};
-        }
-        case "FETCH_USER_FULFILLED": {
-            return {
-                ...state,
-                fetching: false,
-                fetched: true,
-                tweets: action.payload,
-            }
-        }
         case "SET_USER_NAME": {
             return {
                 ...state,
@@ -50,6 +38,18 @@ export default function(state={
             return {
                 ...state,
                 uri: action.payload,
+            }
+        }
+        case "SET_FRIENDS": {
+            return {
+                ...state,
+                user: {...state.user, friends: action.payload}
+            }
+        }
+        case "SET_ERROR": {
+            return {
+                ...state,
+                error: action.payload
             }
         }
     }
