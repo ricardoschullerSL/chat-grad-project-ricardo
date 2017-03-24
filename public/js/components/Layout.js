@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { addFriend, userOath } from "../actions/userActions";
+import { addFriend, userOath, getFriends } from "../actions/userActions";
 import { fetchMessages, receiveMessages } from "../actions/chatActions";
 
 import Footer from "./Footer";
@@ -20,8 +20,13 @@ import store from "../store";
 export default class Layout extends React.Component{
     constructor(props){
         super(props);
-        store.dispatch(userOath());
-        console.log("URI is set");
+        this.props.dispatch(userOath())
+    }
+    componentWillMount(){
+        if(this.props.user.user !== null){
+            this.props.dispatch(fetchMessages(this.props.user.activeChatID));
+            this.props.dispatch(getFriends(this.props.user.user._id));
+        }
     }
     fetchMessages() {
         this.props.dispatch(fetchMessages(this.props.user.activeChatID));
@@ -34,8 +39,7 @@ export default class Layout extends React.Component{
     render(){
         return(
             <div>
-                <Header username={this.props.user.user.name}/>
-                <img src={this.props.user.user.avatarUrl} style={{height:"50px", float:"right"}}></img>
+                <Header user={this.props.user.user}/>
                 <div style={{width:"800px"}}>
                     <div style={{width:"500px", float:"left",}}>
                 <ChatWindow message="Test Message" />

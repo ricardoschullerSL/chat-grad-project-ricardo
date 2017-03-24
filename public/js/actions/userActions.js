@@ -100,5 +100,6 @@ export function userOath() {
             .catch((err) => {console.log("Error during uri request");});
             console.log("End of authentication");
         })
+        return dispatch;
     };
 }

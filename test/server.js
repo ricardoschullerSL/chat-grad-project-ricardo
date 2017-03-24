@@ -10,17 +10,20 @@ var oauthClientId = "1234clientId";
 var testUser = {
     _id: "bob",
     name: "Bob Bilson",
-    avatarUrl: "http://avatar.url.com/u=test"
+    avatarUrl: "http://avatar.url.com/u=test",
+    friends: []
 };
 var testUser2 = {
     _id: "charlie",
     name: "Charlie Colinson",
-    avatarUrl: "http://avatar.url.com/u=charlie_colinson"
+    avatarUrl: "http://avatar.url.com/u=charlie_colinson",
+    friends: []
 };
 var testGithubUser = {
     login: "bob",
     name: "Bob Bilson",
-    avatar_url: "http://avatar.url.com/u=test"
+    avatar_url: "http://avatar.url.com/u=test",
+    friends: []
 };
 var testToken = "123123";
 var testExpiredToken = "987978";
@@ -38,12 +41,17 @@ describe("server", function() {
                 find: sinon.stub(),
                 findOne: sinon.stub(),
                 insertOne: sinon.spy()
+            },
+            chats: {
+                findOne: sinon.stub(),
+
             }
         };
         db = {
             collection: sinon.stub()
         };
         db.collection.withArgs("users").returns(dbCollections.users);
+        db.collection.withArgs("chats").returns(dbCollections.chats);
 
         githubAuthoriser = {
             authorise: function() {},
@@ -119,6 +127,7 @@ describe("server", function() {
                 assert.deepEqual(dbCollections.users.insertOne.firstCall.args[0], {
                     _id: "bob",
                     name: "Bob Bilson",
+                    friends: [],
                     avatarUrl: "http://avatar.url.com/u=test"
                 });
                 done();
@@ -177,7 +186,8 @@ describe("server", function() {
                     assert.deepEqual(JSON.parse(body), {
                         _id: "bob",
                         name: "Bob Bilson",
-                        avatarUrl: "http://avatar.url.com/u=test"
+                        avatarUrl: "http://avatar.url.com/u=test",
+                        friends: []
                     });
                     done();
                 });
@@ -262,4 +272,34 @@ describe("server", function() {
             });
         });
     });
+    describe("GET /api/chats/", function() {
+        var requestUrl = baseUrl + "/api/chats/:chat0";
+        var allChats;
+        beforeEach(function() {
+            allChats = {
+                toArray: sinon.stub()
+            };
+            dbCollections.chats.findOne.returns(allChats);
+        });
+        it("responds with status code 401 if user not authenticated", function(done) {
+            request(requestUrl, function(error, response) {
+                assert.equal(response.statusCode, 401);
+                done();
+            });
+        });
+        it("responds with status code 401 if user has an unrecognised session token", function(done) {
+            cookieJar.setCookie(request.cookie("sessionToken=" + testExpiredToken), baseUrl);
+            request({url: requestUrl, jar: cookieJar}, function(error, response) {
+                assert.equal(response.statusCode, 401);
+                done();
+            });
+        });
+        it("responds with status code 200 if user is authenticated", function(done) {
+            authenticateUser(testUser, testToken, function () {});
+            request({url: requestUrl, jar: cookieJar}, function(error, response) {
+                assert.equal(response.statusCode, 200);
+                done();
+            });
+        });
+    })
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import Friend from "./FriendWindow/Friend.js"
+import FriendList from "./FriendWindow/FriendList.js"
 import { getFriends } from "../actions/userActions.js"
 import { connect } from "react-redux";
 
@@ -19,21 +19,10 @@ export default class FriendWindow extends React.Component{
     }
 
     render(){
-        if(this.props.friends.length > 0) {
-            return (
-                <div>
-                    <ul>
-                        {this.props.friends.map((friend) =>
-                        <li><Friend friend={friend} /></li>)}
-                    </ul>
-                </div>
-            )
-        } else {
-            return(
-                <div>
-                    <span>No contacts yet</span>
-                </div>
-            )
-        }
+        return (
+        <div>
+            <FriendList friends={this.props.user.friends} />
+        </div>
+    );
     }
 }

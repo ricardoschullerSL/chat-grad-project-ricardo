@@ -20,8 +20,8 @@ export default class MessageWindow extends React.Component{
             return (
                 <div style={{height:"600px", overflow:"auto"}}>
                     <ul style={{listStyleType:"none"}}>
-                    {this.props.messages.map((text) =>
-                    <li><Message message={text} /></li>
+                    {this.props.messages.map((text, index) =>
+                    <li key={index}><Message message={text} /></li>
                 )}
                 </ul>
             </div>
