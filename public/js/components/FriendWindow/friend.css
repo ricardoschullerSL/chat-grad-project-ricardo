@@ -1,0 +1,16 @@
+.friend {
+    background-color: #A1D490;
+    height: 40px;
+}
+
+.friendWindow {
+    background-color: #A1D490;
+}
+
+.friendList {
+    list-style-type: decimal;
+    margin: 0 0 0 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 600px;
+}

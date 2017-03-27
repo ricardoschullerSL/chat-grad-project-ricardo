@@ -1,6 +1,7 @@
 import React from "react";
 import Message from "./Message";
 import { connect } from "react-redux";
+import styles from "./chatwindow.css"
 
 @connect((store) => {
     if(store.chat.chats !== null) {
@@ -18,8 +19,8 @@ export default class MessageWindow extends React.Component{
     render(){
         if (this.props.messages !== undefined) {
             return (
-                <div style={{height:"600px", overflow:"auto"}}>
-                    <ul style={{listStyleType:"none"}}>
+                <div class="messageWindow">
+                    <ul class="messageList">
                     {this.props.messages.map((text, index) =>
                     <li key={index}><Message message={text} /></li>
                 )}

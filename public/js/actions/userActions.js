@@ -90,6 +90,7 @@ export function userOath() {
         .then(function(userResult) {
             console.log("User Result is :", userResult.data);
             dispatch(setUser(userResult.data));
+            dispatch(setFriends(userResult.data.friends));
         })
         .catch((err) => {
             console.log("Error": err);
@@ -100,6 +101,5 @@ export function userOath() {
             .catch((err) => {console.log("Error during uri request");});
             console.log("End of authentication");
         })
-        return dispatch;
     };
 }

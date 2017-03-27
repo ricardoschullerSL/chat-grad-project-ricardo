@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 import ChatWindow from "./ChatWindow";
 import FriendWindow from "./FriendWindow";
+import styles from "./layout.css";
 
 import store from "../store";
 
@@ -25,7 +26,6 @@ export default class Layout extends React.Component{
     componentWillMount(){
         if(this.props.user.user !== null){
             this.props.dispatch(fetchMessages(this.props.user.activeChatID));
-            this.props.dispatch(getFriends(this.props.user.user._id));
         }
     }
     fetchMessages() {
@@ -40,15 +40,15 @@ export default class Layout extends React.Component{
         return(
             <div>
                 <Header user={this.props.user.user}/>
-                <div style={{width:"800px"}}>
-                    <div style={{width:"500px", float:"left",}}>
+                <div class="bodyContainer">
+                    <div class="chatWindowContainer">
                 <ChatWindow message="Test Message" />
             </div>
-                <div style={{width:"200px", float:"right"}}>
+                <div class="friendListContainer">
                     <FriendWindow friends={this.props.user.friends} />
                 </div>
             </div>
-            <div style={{position:"absolute", bottom:"20px"}}>
+            <div class="bottomButtons">
             <button>
                 <a href={this.props.user.uri}>Log In</a></button>
                 <button onClick={this.fetchMessages.bind(this)}>Fetch Messages</button>

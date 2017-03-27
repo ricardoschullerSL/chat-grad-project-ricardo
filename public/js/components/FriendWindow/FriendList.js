@@ -1,5 +1,6 @@
 import React from "react";
-import Friend from "./Friend.js"
+import Friend from "./Friend.js";
+import styles from "./friend.css";
 
 export default class FriendWindow extends React.Component{
     constructor(props){
@@ -9,8 +10,8 @@ export default class FriendWindow extends React.Component{
     render(){
         if(this.props.friends.length > 0) {
             return (
-                <div>
-                    <ul>
+                <div class="friendWindow">
+                    <ul class="friendList">
                         {this.props.friends.map((friend, index) =>
                         <li key={index}><Friend friend={friend} /></li>)}
                     </ul>

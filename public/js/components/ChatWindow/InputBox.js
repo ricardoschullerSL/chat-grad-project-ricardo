@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { sendMessage } from "../../actions/chatActions";
 import store from "../../store";
+import styles from "./chatwindow.css";
 
 @connect((store) => {
     return {
@@ -29,8 +30,8 @@ export default class InputBox extends React.Component {
 
     render(){
         return (
-            <div><form onSubmit={this.handleSubmit}>
-            <input type="text" value={this.state.value} onChange={this.handleChange}
+            <div><form class="inputBox" onSubmit={this.handleSubmit}>
+            <input class="inputForm" type="text" value={this.state.value} onChange={this.handleChange}
                 placeholder="Type your message" />
             <button>Send Message</button>
         </form></div>

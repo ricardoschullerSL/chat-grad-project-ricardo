@@ -27,6 +27,7 @@ var testGithubUser = {
 };
 var testToken = "123123";
 var testExpiredToken = "987978";
+var testMessages = ["test", "hello"];
 
 describe("server", function() {
     var cookieJar;
@@ -272,14 +273,14 @@ describe("server", function() {
             });
         });
     });
-    describe("GET /api/chats/", function() {
+    describe("GET /api/chats/chat0", function() {
         var requestUrl = baseUrl + "/api/chats/:chat0";
-        var allChats;
+        var testChat;
         beforeEach(function() {
-            allChats = {
-                toArray: sinon.stub()
+            testChat = {
+                findOne: sinon.stub()
             };
-            dbCollections.chats.findOne.returns(allChats);
+            dbCollections.chats.findOne.returns(testChat);
         });
         it("responds with status code 401 if user not authenticated", function(done) {
             request(requestUrl, function(error, response) {
@@ -295,11 +296,40 @@ describe("server", function() {
             });
         });
         it("responds with status code 200 if user is authenticated", function(done) {
-            authenticateUser(testUser, testToken, function () {});
-            request({url: requestUrl, jar: cookieJar}, function(error, response) {
-                assert.equal(response.statusCode, 200);
-                done();
+            authenticateUser(testUser, testToken, function() {
+                dbCollections.chats.findOne.callsArgWith(1, null, ["testMessage"]);
+                request({url: requestUrl, jar: cookieJar}, function(error, response) {
+                    assert.equal(response.statusCode, 200);
+                    done();
+                });
             });
         });
-    })
+        it("responds with a body that is a JSON representation of the chat if user is authenticated", function(done) {
+            authenticateUser(testUser, testToken, function() {
+                dbCollections.chats.findOne.callsArgWith(1, null, {
+                    _id: "chat0",
+                    messages: testMessages,
+                    usersListening: [testUser._id]
+                });
+                request({url:requestUrl, jar:cookieJar}, function(error, response, body) {
+                    assert.deepEqual(JSON.parse(body), {
+                        _id: "chat0",
+                        messages: ["test", "hello"],
+                        usersListening: ["bob"]
+                    });
+                    done();
+
+                });
+            });
+        });
+        it("responds with status code 500 if database error", function(done) {
+            authenticateUser(testUser, testToken, function() {
+                dbCollections.chats.findOne.callsArgWith(1, {err: "Database failure"}, null);
+                request({url: requestUrl, jar: cookieJar}, function(error, response) {
+                    assert.equal(response.statusCode, 500);
+                    done();
+                });
+            });
+        });
+    });
 });

@@ -1,9 +1,14 @@
 import React from "react";
+import styles from "./friend.css";
 
 export default class Friend extends React.Component {
     render(){
         return (
-            <span>{this.props.friend.friendID}</span>
+            <div class="friend">
+                <img src={this.props.friend.avatarUrl}></img>
+                <span>{this.props.friend.friendID}</span>
+
+            </div>
         )
     }
 }

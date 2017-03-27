@@ -1,0 +1,19 @@
+.messageWindow {
+    height: 600px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.messageList {
+    list-style-type: none;
+    padding-left:0px;
+}
+
+.inputBox {
+    width : 100%;
+    border-width: 4px;
+}
+
+.inputForm {
+    float: left;
+}

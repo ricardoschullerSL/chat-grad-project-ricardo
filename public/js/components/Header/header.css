@@ -1,0 +1,22 @@
+.header {
+    display: flex;
+    align-items: center;
+}
+.header span {
+    float: left;
+}
+
+.avatar {
+    height: 60px;
+    display: inline-block;
+    float: left;
+}
+
+.background {
+    background-color: #90C3D4;
+}
+
+h2 {
+    background-color: inherit;
+    margin-bottom: 0px;
+}

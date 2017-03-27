@@ -1,0 +1,18 @@
+.bodyContainer {
+    width: 800px;
+}
+
+.chatWindowContainer {
+    width: 75%;
+    float: right;
+}
+
+.friendListContainer {
+    width: 25%;
+    float: left;
+}
+
+.bottomButtons {
+    position: absolute;
+    bottom: 20px;
+}
