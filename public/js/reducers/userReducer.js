@@ -7,7 +7,6 @@ export default function(state={
     uri: "",
     error: "",
     friends: [],
-    activeChatID: "chat0",
 }, action) {
     switch(action.type) {
         case "SET_USER_NAME": {

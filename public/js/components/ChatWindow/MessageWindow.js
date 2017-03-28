@@ -5,8 +5,10 @@ import styles from "./chatwindow.css"
 
 @connect((store) => {
     if(store.chat.chats !== null) {
+        console.log(store.chat.activeChatID);
     return {
-        messages: store.chat.chats.chat0.messages,
+        chats: store.chat.chats,
+        activeChatID: store.chat.activeChatID
     };
 } else {
     return{
@@ -17,11 +19,11 @@ import styles from "./chatwindow.css"
 export default class MessageWindow extends React.Component{
 
     render(){
-        if (this.props.messages !== undefined) {
+        if (this.props.chats !== undefined) {
             return (
                 <div class="messageWindow">
                     <ul class="messageList">
-                    {this.props.messages.map((text, index) =>
+                    {this.props.chats[this.props.activeChatID].messages.map((text, index) =>
                     <li key={index}><Message message={text} /></li>
                 )}
                 </ul>

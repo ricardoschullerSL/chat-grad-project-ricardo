@@ -5,7 +5,8 @@ import { connect } from "react-redux";
 
 @connect((store) => {
     return {
-        user: store.user
+        user: store.user,
+        activeChatID: store.chat.activeChatID,
     }
 })
 export default class FriendWindow extends React.Component{
@@ -13,15 +14,11 @@ export default class FriendWindow extends React.Component{
         super();
     }
 
-    componentWillMount(){
-        console.log("this.props.user is,", this.props.user);
-        getFriends(this.props.user.user._id);
-    }
-
     render(){
         return (
         <div>
-            <FriendList friends={this.props.user.friends} />
+            <FriendList friends={this.props.user.friends}
+                activeChatID={this.props.activeChatID}/>
         </div>
     );
     }

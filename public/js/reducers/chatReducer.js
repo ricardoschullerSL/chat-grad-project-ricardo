@@ -1,9 +1,13 @@
 export default function(state={
+    activeChatID: "chat0",
     chats: { chat0:
             {messages: ["Please fetch messages"], users: [], id: "chat0" }
     },
 }, action) {
     switch(action.type) {
+        case "SET_CHAT_ID": {
+            return { ...state, activeChatID: action.payload}
+        }
         case "FETCH_MESSAGES": {
             return {...state, fetching: true};
         }

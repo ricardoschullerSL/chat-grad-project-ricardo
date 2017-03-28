@@ -10,7 +10,7 @@ export default class Title extends React.Component{
                     <h1>Welcome {name}!</h1>
                     <img class="avatar" src={this.props.user.avatarUrl}></img>
                 </div>
-                <h2>This site is now encrypted with quadruple ROT13</h2>
+                <h2>This site is now encrypted with quadruple ROT13*</h2>
             </div>
         );
     }

@@ -45,7 +45,7 @@ describe("server", function() {
             },
             chats: {
                 findOne: sinon.stub(),
-
+                findAndModify: sinon.stub(),
             }
         };
         db = {
@@ -277,9 +277,9 @@ describe("server", function() {
         var requestUrl = baseUrl + "/api/chats/:chat0";
         var testChat;
         beforeEach(function() {
-            testChat = {
-                findOne: sinon.stub()
-            };
+            // testChat = {
+            //     findOne: sinon.stub()
+            // };
             dbCollections.chats.findOne.returns(testChat);
         });
         it("responds with status code 401 if user not authenticated", function(done) {
@@ -326,6 +326,41 @@ describe("server", function() {
             authenticateUser(testUser, testToken, function() {
                 dbCollections.chats.findOne.callsArgWith(1, {err: "Database failure"}, null);
                 request({url: requestUrl, jar: cookieJar}, function(error, response) {
+                    assert.equal(response.statusCode, 500);
+                    done();
+                });
+            });
+        });
+    });
+    describe("POST /api/chats/chat0", function() {
+        var requestUrl = baseUrl + "/api/chats/:chat0";
+
+        it("responds with status code 401 if user not authenticated", function(done) {
+            request.post(requestUrl, { message:"test message" }, function(error, response) {
+                assert.equal(response.statusCode, 401);
+                done();
+            });
+        });
+        it("responds with status code 401 if user has an unrecognised session token", function(done) {
+            cookieJar.setCookie(request.cookie("sessionToken=" + testExpiredToken), baseUrl);
+            request.post({url: requestUrl, jar: cookieJar, message:"test message"}, function(error, response) {
+                assert.equal(response.statusCode, 401);
+                done();
+            });
+        });
+        it("responds with status code 200 if user is authenticated", function(done) {
+            authenticateUser(testUser, testToken, function() {
+                dbCollections.chats.findAndModify.callsArgWith(4, null, {value:"test message"});
+                request.post({url:requestUrl, jar: cookieJar, message:"test message"}, function(error, response) {
+                    assert.equal(response.statusCode, 200);
+                    done();
+                });
+            });
+        });
+        it("responds with status code 500 if there was a server error", function(done) {
+            authenticateUser(testUser, testToken, function() {
+                dbCollections.chats.findAndModify.callsArgWith(4, "Database failure", {value:"test message"});
+                request.post({url:requestUrl, jar: cookieJar, message:"test message"}, function(error, response) {
                     assert.equal(response.statusCode, 500);
                     done();
                 });

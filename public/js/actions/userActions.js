@@ -68,19 +68,29 @@ export function getFriends(userID) {
     };
 
 }
-
-export function addFriend(userID, { friendID, chatID }) {
-    return function(dispatch) {
-        axios.post("/api/friends/" + userID, { friendID, chatID })
-        .then((result) => {
-            console.log("Added friend: ", result);
-            dispatch(setFriends(result.data));
+export function getUser(userID) {
+    return axios.get("/api/users")
+        .then((users) => {
+            return users.find((user) => user._id === userID);
         })
         .catch((error) => {
-            dispatch(setError(error.message));
-        })
-    }
-}
+            console.log(error);
+        });
+};
+export function addFriend(userID, friendID) {
+    return function(dispatch) {
+        getUser(friendID).then((friend) => {
+            axios.post("/api/friends/" + userID, { friend })
+            .then((result) => {
+                console.log("Added friend: ", result);
+                dispatch(setFriends(result.data));
+            })
+            .catch((error) => {
+                dispatch(setError(error.message));
+            })
+        });
+    };
+};
 
 export function userOath() {
     console.log("Authentication started...");

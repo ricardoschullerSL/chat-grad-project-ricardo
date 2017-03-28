@@ -1,6 +1,9 @@
 .friend {
     background-color: #A1D490;
-    height: 40px;
+    height: 90px;
+    align-items: center;
+    border: 5px solid #8AB57B;
+    margin: 10px;
 }
 
 .friendWindow {
@@ -8,9 +11,19 @@
 }
 
 .friendList {
-    list-style-type: decimal;
+    list-style-type: none;
     margin: 0 0 0 0;
+    padding: 0;
     overflow-x: hidden;
     overflow-y: auto;
     height: 600px;
+}
+
+.friendAvatar {
+    height:inherit;
+}
+
+.name {
+    position:relative;
+    bottom:5%;
 }

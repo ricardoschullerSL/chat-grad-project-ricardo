@@ -95,6 +95,19 @@ module.exports = function(port, db, githubAuthoriser) {
         });
     });
 
+    app.get("/api/user/allchats", function(req, res) {
+        //return all messages
+        chats.find({usersListening: req.session.user._id})
+        .toArray(function(err, docs) {
+            if (!err) {
+                res.json(docs.map(function(chat) {
+                    return { chat }}));
+            } else {
+                res.sendStatus(500);
+            }
+        });
+    });
+
     app.get("/api/chats/:chatID", function(req, res) {
         // Return messages from chat with _id: chatID
         chats.findOne({
@@ -120,7 +133,6 @@ module.exports = function(port, db, githubAuthoriser) {
                 if(!err) {
                     res.json(object.value);
                 } else {
-                    console.log(err);
                     res.sendStatus(500);
                 }
             }
@@ -135,7 +147,6 @@ module.exports = function(port, db, githubAuthoriser) {
                 if(!err) {
                     res.json(doc.value.friends);
                 } else {
-                    console.log(err);
                     res.sendStatus(500);
                 }
             }
@@ -154,7 +165,6 @@ module.exports = function(port, db, githubAuthoriser) {
                 if(!err) {
                     res.json(doc.value.friends);
                 } else {
-                    console.log(err);
                     res.sendStatus(500);
 
                 }

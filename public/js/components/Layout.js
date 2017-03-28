@@ -25,11 +25,11 @@ export default class Layout extends React.Component{
     }
     componentWillMount(){
         if(this.props.user.user !== null){
-            this.props.dispatch(fetchMessages(this.props.user.activeChatID));
+            this.props.dispatch(fetchMessages(this.props.chat.activeChatID));
         }
     }
     fetchMessages() {
-        this.props.dispatch(fetchMessages(this.props.user.activeChatID));
+        this.props.dispatch(fetchMessages(this.props.chat.activeChatID));
     }
     addFriend() {
         this.props.dispatch(addFriend(this.props.user.user._id,
