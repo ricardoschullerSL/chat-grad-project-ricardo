@@ -35,23 +35,23 @@ module.exports = function(grunt) {
                 print: "none"
             }
         },
-        "istanbul_report": {
-            test: {
-
-            },
-            options: {
-                coverageFolder: artifactsLocation
-            }
-        },
-        "istanbul_check_coverage": {
-            test: {
-
-            },
-            options: {
-                coverageFolder: artifactsLocation,
-                check: true
-            }
-        }
+        // "istanbul_report": {
+        //     test: {
+        //
+        //     },
+        //     options: {
+        //         coverageFolder: artifactsLocation
+        //     }
+        // },
+        // "istanbul_check_coverage": {
+        //     test: {
+        //
+        //     },
+        //     options: {
+        //         coverageFolder: artifactsLocation,
+        //         check: true
+        //     }
+        // }
     });
 
     grunt.registerMultiTask("istanbul_report", "Solo task for generating a report over multiple files.", function () {
@@ -73,7 +73,6 @@ module.exports = function(grunt) {
     });
 
     // grunt.registerTask("check", ["jshint", "jscs"]);
-    grunt.registerTask("test", ["mochaTest", "mocha_istanbul", "istanbul_report",
-        "istanbul_check_coverage"]);
+    grunt.registerTask("test", ["mochaTest", "mocha_istanbul"]);
     grunt.registerTask("default", "test");
 };
