@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { addFriend, userOath, getFriends } from "../actions/userActions";
-import { fetchMessages, receiveMessages } from "../actions/chatActions";
+import { fetchAllChats, receiveMessages } from "../actions/chatActions";
 
 import Footer from "./Footer";
 import Header from "./Header";
@@ -25,15 +25,15 @@ export default class Layout extends React.Component{
     }
     componentWillMount(){
         if(this.props.user.user !== null){
-            this.props.dispatch(fetchMessages(this.props.chat.activeChatID));
+            this.props.dispatch(fetchAllChats());
         }
     }
-    fetchMessages() {
-        this.props.dispatch(fetchMessages(this.props.chat.activeChatID));
+    fetchAllChats() {
+        this.props.dispatch(fetchAllChats());
     }
     addFriend() {
         this.props.dispatch(addFriend(this.props.user.user._id,
-            {friendID:"testfriend", chatID: "testchat0"}));
+            {friendID:"ricksanchez"}));
     }
 
     render(){
@@ -51,8 +51,8 @@ export default class Layout extends React.Component{
             <div class="bottomButtons">
             <button>
                 <a href={this.props.user.uri}>Log In</a></button>
-                <button onClick={this.fetchMessages.bind(this)}>Fetch Messages</button>
-                <button onClick={this.addFriend.bind(this)}>Add Test Friend</button>
+                <button onClick={this.fetchAllChats.bind(this)}>Fetch Messages</button>
+                <button onClick={this.addFriend.bind(this)}>Add Rick Sanchez</button>
                 <span> Error: {this.props.user.error} </span>
                 <Footer />
             </div>

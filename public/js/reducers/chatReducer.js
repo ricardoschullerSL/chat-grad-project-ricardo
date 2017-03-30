@@ -11,29 +11,35 @@ export default function(state={
         case "FETCH_MESSAGES": {
             return {...state, fetching: true};
         }
-        case "RECEIVE_MESSAGES_REJECTED": {
-            return {...state, fetching: false, error: action.payload};
-        }
-        case "RECEIVE_MESSAGES_FULFILLED": {
+
+        case "PUSH_MESSAGE": {
+            let newMessageArray = state.chats[action.chatID].messages.concat(action.payload);
             return {
                 ...state,
-                fetching: false,
-                fetched: true,
-                chat: {...state.chat, messages: action.payload}
+                chats: {
+                    ...state.chats,
+                    [action.chatID]: {
+                        ...state.chats[action.chatID],
+                        messages: newMessageArray
+                    }
+                }
             }
         }
-        case "RECEIVE_ALL_MESSAGES": {
+
+        case "RECEIVE_ALL_CHATS": {
             return {
                 ...state,
                 chats: action.payload
             }
         }
-        case "RECEIVE_MESSAGES": {
-            var chatID = action.chatID;
-            console.log("chatID is" ,chatID);
-            var newState = {...state}
-            newState.chats[chatID] = action.payload;
-            return newState;
+        case "RECEIVE_CHAT": {
+            return {
+                ...state,
+                chats: {
+                    ...state.chats,
+                    [action.chatID]: action.payload
+                }
+            }
         }
     }
     return state;

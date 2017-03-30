@@ -1,6 +1,7 @@
 var express = require("express");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
+var series = require("async/series");
 
 module.exports = function(port, db, githubAuthoriser) {
     var app = express();
@@ -96,7 +97,7 @@ module.exports = function(port, db, githubAuthoriser) {
     });
 
     app.get("/api/user/allchats", function(req, res) {
-        //return all messages
+        //return all chats belonging to user
         chats.find({usersListening: req.session.user._id})
         .toArray(function(err, docs) {
             if (!err) {
@@ -131,7 +132,7 @@ module.exports = function(port, db, githubAuthoriser) {
             function(err, object) { //callback
 
                 if(!err) {
-                    res.json(object.value);
+                    res.sendStatus(200);
                 } else {
                     res.sendStatus(500);
                 }
@@ -153,24 +154,50 @@ module.exports = function(port, db, githubAuthoriser) {
         );
     });
 
-    app.post("/api/friends/:userID", function(req, res){
-        // Add new user to userID.friends
-        console.log(req.body)
+    app.post("/api/friends/addFriend", function(req, res) {
+        // Add new friend to userID.friends
+        let userID = req.session.user._id;
+        let friendID = req.body.friendID.friendID;
+        let chatID = userID < friendID ? userID + friendID : friendID + userID;
+        let promiseObject = {user: {
+            friendID: userID,
+            name: req.session.user.name,
+            avatarUrl: req.session.user.avatarUrl,
+            chatID: chatID
+        }};
         users.findAndModify(
-            {_id: req.params.userID},
-            [["_id", 1]],
-            {$push: {friends: req.body}},
-            {new: true},
-            function(err, doc) {
-                if(!err) {
-                    res.json(doc.value.friends);
-                } else {
-                    res.sendStatus(500);
-
+            { _id: friendID }, //query
+            [["_id", 1]], //sort
+            {$addToSet: {friends: promiseObject.user}}, //update object
+            {new: true})
+        .then(function(doc) {
+            promiseObject.friend = {
+                    friendID: doc.value._id,
+                    name: doc.value.name,
+                    avatarUrl: doc.value.avatarUrl,
+                    chatID: chatID
                 }
-            }
-        );
-    })
+            return promiseObject;
+        })
+        .then(function(promiseObject) {
+            users.findAndModify(
+                {_id: promiseObject.user.friendID},
+                [["_id",1]],
+                {$addToSet: {friends: promiseObject.friend}}
+            );
+            chats.insertOne({
+                    _id: chatID,
+                    messages: [],
+                    usersListening: [userID, friendID]
+            })
+            .catch((err) => {res.sendStatus(500)});
+
+        })
+        .catch(function(err) {
+            console.log("Caught error:", err.message);
+            res.status(500).send(err)});
+    });
+
 
     return app.listen(port);
 };

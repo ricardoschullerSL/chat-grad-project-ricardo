@@ -79,16 +79,14 @@ export function getUser(userID) {
 };
 export function addFriend(userID, friendID) {
     return function(dispatch) {
-        getUser(friendID).then((friend) => {
-            axios.post("/api/friends/" + userID, { friend })
-            .then((result) => {
-                console.log("Added friend: ", result);
-                dispatch(setFriends(result.data));
-            })
-            .catch((error) => {
-                dispatch(setError(error.message));
-            })
-        });
+        axios.post("/api/friends/addFriend", { friendID })
+        .then((result) => {
+            console.log("Added friend: ", result);
+            dispatch(setFriends(result.data));
+        })
+        .catch((error) => {
+            dispatch(setError(error.message));
+        })
     };
 };
 

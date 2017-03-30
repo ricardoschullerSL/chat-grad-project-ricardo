@@ -11,8 +11,8 @@ export function changeChatID(chatID) {
     };
 };
 
-export function fetchMessages() {
-    console.log("FetchMessages called");
+export function fetchAllChats() {
+    console.log("FetchAllChats called");
     return function (dispatch) {
         axios.get("/api/user/allchats")
         .then((result) => {
@@ -21,7 +21,7 @@ export function fetchMessages() {
             for (let i = 0; i < result.data.length; i++) {
                 chat[result.data[i].chat._id] = result.data[i].chat;
             }
-            dispatch({type:"RECEIVE_ALL_MESSAGES", payload: chat});
+            dispatch({type:"RECEIVE_ALL_CHATS", payload: chat});
         });
     };
 };
@@ -31,7 +31,7 @@ export function sendMessage(message, chatID) {
     return function(dispatch) {
         axios.post("/api/chats/" + chatID, { message })
         .then((result) => {
-            dispatch({type:"RECEIVE_MESSAGES", "chatID": chatID, payload: result.data});
+            dispatch({type:"PUSH_MESSAGE", chatID: chatID, payload: message});
         })
         .catch((err) => {console.log(err)})
     }

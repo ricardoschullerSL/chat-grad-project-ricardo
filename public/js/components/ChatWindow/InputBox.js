@@ -20,7 +20,8 @@ export default class InputBox extends React.Component {
 
     handleSubmit(event){
         event.preventDefault();
-        this.props.dispatch(sendMessage(this.state.value, this.props.user.activeChatID));
+        console.log("sendMessage args:", this.state.value, this.props.chat.activeChatID);
+        this.props.dispatch(sendMessage(this.state.value, this.props.chat.activeChatID))
         this.state = {value: ""};
     }
 
