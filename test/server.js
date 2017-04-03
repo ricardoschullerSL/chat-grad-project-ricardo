@@ -45,7 +45,7 @@ describe("server", function() {
             },
             chats: {
                 findOne: sinon.stub(),
-                findAndModify: sinon.stub(),
+                updateOne: sinon.stub(),
             }
         };
         db = {
@@ -350,7 +350,7 @@ describe("server", function() {
         });
         it("responds with status code 200 if user is authenticated", function(done) {
             authenticateUser(testUser, testToken, function() {
-                dbCollections.chats.findAndModify.callsArgWith(4, null, {value:"test message"});
+                dbCollections.chats.updateOne.callsArgWith(4, null, {value:"test message"});
                 request.post({url:requestUrl, jar: cookieJar, message:"test message"}, function(error, response) {
                     assert.equal(response.statusCode, 200);
                     done();
@@ -359,7 +359,7 @@ describe("server", function() {
         });
         it("responds with status code 500 if there was a server error", function(done) {
             authenticateUser(testUser, testToken, function() {
-                dbCollections.chats.findAndModify.callsArgWith(4, "Database failure", {value:"test message"});
+                dbCollections.chats.updateOne.callsArgWith(4, "Database failure", {value:"test message"});
                 request.post({url:requestUrl, jar: cookieJar, message:"test message"}, function(error, response) {
                     assert.equal(response.statusCode, 500);
                     done();

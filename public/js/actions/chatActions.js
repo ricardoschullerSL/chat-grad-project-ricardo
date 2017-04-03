@@ -2,13 +2,11 @@ import fetch from "isomorphic-fetch";
 import axios from "axios";
 import store from "../store";
 
-export function changeChatID(chatID) {
-    return function (dispatch) {
-        dispatch({
+export function changeActiveChatID(chatID) {
+    return {
             type:"SET_CHAT_ID",
             payload:chatID
-        });
-    };
+        };
 };
 
 export function fetchAllChats() {
@@ -31,7 +29,7 @@ export function sendMessage(message, chatID) {
     return function(dispatch) {
         axios.post("/api/chats/" + chatID, { message })
         .then((result) => {
-            dispatch({type:"PUSH_MESSAGE", chatID: chatID, payload: message});
+            // dispatch({type:"PUSH_MESSAGE", chatID: chatID, payload: message});
         })
         .catch((err) => {console.log(err)})
     }

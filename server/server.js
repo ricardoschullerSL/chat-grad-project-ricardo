@@ -1,7 +1,10 @@
 var express = require("express");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
-var series = require("async/series");
+var http = require("http");
+var WebSocketServer = require("websocket").server;
+var url = require("url");
+
 
 module.exports = function(port, db, githubAuthoriser) {
     var app = express();
@@ -10,9 +13,22 @@ module.exports = function(port, db, githubAuthoriser) {
     app.use(express.static("public"));
     app.use(cookieParser());
 
+    var server = http.createServer(app);
+    var wss = new WebSocketServer({ httpServer: server});
+
+    wss.on("request", function(request) {
+        var connection = request.accept("echo-protocol", request.origin);
+        console.log((new Date()) + "Connection accepted.");
+        connection.on("message", function(message) {
+            console.log("Received message: ", message.utf8Data);
+        });
+    });
+
     var users = db.collection("users");
     var chats = db.collection("chats");
     var sessions = {};
+    var connections = [];
+
 
     app.get("/oauth", function(req, res) {
         githubAuthoriser.authorise(req, function(githubUser, token) {
@@ -198,6 +214,5 @@ module.exports = function(port, db, githubAuthoriser) {
             res.status(500).send(err)});
     });
 
-
-    return app.listen(port);
+    return server.listen(port);
 };

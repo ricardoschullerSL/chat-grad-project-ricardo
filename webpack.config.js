@@ -38,6 +38,10 @@ module.exports = {
         proxy: {
             "/api": {
                 target: "http://localhost:9090/",
+            },
+            "/napi/*": {
+                target: "ws://localhost:9090/",
+                ws: true,
             }
         }
     }

@@ -6,6 +6,8 @@ import Layout from "./components/Layout";
 import { Provider } from "react-redux";
 
 import store from "./store";
+import "./websocket.js";
+
 
 const app = document.getElementById("app");
 
