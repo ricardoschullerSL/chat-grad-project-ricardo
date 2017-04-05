@@ -80,7 +80,7 @@ export function getUser(userID) {
 };
 export function addFriend(userID, friendID) {
     return function(dispatch) {
-        axios.post("/api/friends/addFriend", { friendID })
+        axios.put("/api/friends/addFriend", { friendID })
         .then((result) => {
             console.log("Added friend: ", result);
             dispatch(setFriends(result.data));

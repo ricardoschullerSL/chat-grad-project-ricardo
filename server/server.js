@@ -52,7 +52,7 @@ module.exports = function(port, db, githubAuthoriser) {
     });
 
 
-    function pushMessageToUsers(message, usersListening, chatID) {
+    function pushMessageToUsers(message, usersListening, chatID, sender) {
         console.log("usersListening is :", usersListening);
         usersListening.forEach(function(userID) {
             console.log("User: ", userID);
@@ -67,7 +67,8 @@ module.exports = function(port, db, githubAuthoriser) {
                 userWebSocket.send(JSON.stringify({
                     type:"message",
                     chatID: chatID,
-                    message: message
+                    message: message,
+                    sentBy: sender
                 }));
             }
 
@@ -189,12 +190,14 @@ module.exports = function(port, db, githubAuthoriser) {
         chats.findAndModify(
             { _id: req.params.chatID }, //query
             [["_id", 1]], //sort
-            {$push: {messages: req.body.message}}, //update object
+            {$push: {messages: {text:req.body.message,
+                                sentBy:req.session.user._id}}}, //update object
             {new: true}, //options
             function(err, object) { //callback
                 if(!err) {
                     console.log(req.body.message, object.value.usersListening);
-                    pushMessageToUsers(req.body.message, object.value.usersListening, req.params.chatID);
+                    pushMessageToUsers(req.body.message, object.value.usersListening,
+                         req.params.chatID, req.session.user._id);
                     res.sendStatus(200);
                 } else {
                     res.sendStatus(500);
@@ -217,10 +220,11 @@ module.exports = function(port, db, githubAuthoriser) {
         );
     });
 
-    app.post("/api/friends/addFriend", function(req, res) {
+    app.put("/api/friends/addFriend", function(req, res) {
         // Add new friend to userID.friends
         let userID = req.session.user._id;
-        let friendID = req.body.friendID.friendID;
+        let friendID = req.body.friendID;
+        console.log(req.session, req.body);
         let chatID = userID < friendID ? userID + friendID : friendID + userID;
         let promiseObject = {user: {
             friendID: userID,

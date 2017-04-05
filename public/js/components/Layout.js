@@ -3,10 +3,11 @@ import { connect } from "react-redux";
 import { addFriend, userOath, getFriends } from "../actions/userActions";
 import { fetchAllChats, receiveMessages } from "../actions/chatActions";
 
+import AddFriend from "./AddFriend";
 import Footer from "./Footer";
+import FriendWindow from "./FriendWindow";
 import Header from "./Header";
 import ChatWindow from "./ChatWindow";
-import FriendWindow from "./FriendWindow";
 import styles from "./layout.css";
 
 import store from "../store";
@@ -48,11 +49,15 @@ export default class Layout extends React.Component{
                     <FriendWindow friends={this.props.user.friends} />
                 </div>
             </div>
+            <div>
+                <AddFriend />
+            </div>
             <div class="bottomButtons">
             <button>
                 <a href={this.props.user.uri}>Log In</a></button>
                 <button onClick={this.fetchAllChats.bind(this)}>Fetch Messages</button>
-                <button onClick={this.addFriend.bind(this)}>Add Rick Sanchez</button>
+
+
                 <span> Error: {this.props.user.error} </span>
                 <Footer />
             </div>

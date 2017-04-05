@@ -24,8 +24,8 @@ export default class MessageWindow extends React.Component{
                 <div class="messageWindow">
                     <span>ActiveChatID is {this.props.activeChatID}</span>
                     <ul class="messageList">
-                    {this.props.chats[this.props.activeChatID].messages.map((text, index) =>
-                    <li key={index}><Message message={text} /></li>
+                    {this.props.chats[this.props.activeChatID].messages.map((message, index) =>
+                    <li key={index}><Message text={message.text} sentBy={message.sentBy} /></li>
                 )}
                 </ul>
             </div>

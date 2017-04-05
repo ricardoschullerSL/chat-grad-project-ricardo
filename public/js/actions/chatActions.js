@@ -50,7 +50,7 @@ ws.onmessage = function incoming(e) {
         store.dispatch({
             type:"PUSH_MESSAGE",
             chatID: data.chatID,
-            payload: data.message
+            payload: {text:data.message, sentBy:data.sentBy}
         });
     }
 };
