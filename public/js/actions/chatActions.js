@@ -34,3 +34,23 @@ export function sendMessage(message, chatID) {
         .catch((err) => {console.log(err)})
     }
 }
+
+const ws = new WebSocket("ws://" + location.host + "/websocket");
+console.log(location);
+ws.onopen = function open() {
+    console.log("User connected");
+}
+
+ws.onmessage = function incoming(e) {
+
+    console.log(e);
+    const data = JSON.parse(e.data);
+
+    if (data.type === "message") {
+        store.dispatch({
+            type:"PUSH_MESSAGE",
+            chatID: data.chatID,
+            payload: data.message
+        });
+    }
+};

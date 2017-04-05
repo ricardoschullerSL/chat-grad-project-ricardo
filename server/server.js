@@ -1,33 +1,79 @@
-var express = require("express");
-var cookieParser = require("cookie-parser");
-var bodyParser = require("body-parser");
-var http = require("http");
-var WebSocketServer = require("websocket").server;
-var url = require("url");
+const express = require("express");
+const http = require("http");
+const url = require("url");
+const WebSocket = require("ws");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+
 
 
 module.exports = function(port, db, githubAuthoriser) {
-    var app = express();
+    const app = express();
 
     app.use(bodyParser.json());
     app.use(express.static("public"));
     app.use(cookieParser());
 
-    var server = http.createServer(app);
-    var wss = new WebSocketServer({ httpServer: server});
 
-    wss.on("request", function(request) {
-        var connection = request.accept("echo-protocol", request.origin);
-        console.log((new Date()) + "Connection accepted.");
-        connection.on("message", function(message) {
-            console.log("Received message: ", message.utf8Data);
-        });
-    });
+    const server = http.createServer(app);
+    const wss = new WebSocket.Server({
+        server: server,
+        path: "/websocket"
+     });
 
     var users = db.collection("users");
     var chats = db.collection("chats");
     var sessions = {};
-    var connections = [];
+    var websockets = [];
+    var usersOnline = [];
+
+    wss.on("connection", function connection(ws) {
+
+        const location = url.parse(ws.upgradeReq.url, true);
+        const sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
+        if (sessions[sessionToken]) {
+            const user = sessions[sessionToken].user;
+            ws.userID = user._id;
+            websockets.push(ws);
+            usersOnline.push(user._id);
+            ws.send(JSON.stringify({type:"login", data:"You are logged in."}));
+
+        }
+
+        console.log((new Date()) + ", user connected");
+        ws.on("message", function incoming(message) {
+            console.log("Received message: ", message);
+        });
+
+        ws.on("close", function close(ws) {
+            console.log((new Date()) + ", user disconnected");
+
+        });
+    });
+
+
+    function pushMessageToUsers(message, usersListening, chatID) {
+        console.log("usersListening is :", usersListening);
+        usersListening.forEach(function(userID) {
+            console.log("User: ", userID);
+            console.log("usersOnline: ", usersOnline);
+            if (usersOnline.indexOf(userID) > -1) {
+                console.log("User is online");
+                userWebSocket = websockets.find(function(wsUser) {
+                    console.log("userWebSocket found!");
+                    return wsUser.userID === userID
+                })
+                console.log("Message is:", message);
+                userWebSocket.send(JSON.stringify({
+                    type:"message",
+                    chatID: chatID,
+                    message: message
+                }));
+            }
+
+
+        });
+    };
 
 
     app.get("/oauth", function(req, res) {
@@ -146,8 +192,9 @@ module.exports = function(port, db, githubAuthoriser) {
             {$push: {messages: req.body.message}}, //update object
             {new: true}, //options
             function(err, object) { //callback
-
                 if(!err) {
+                    console.log(req.body.message, object.value.usersListening);
+                    pushMessageToUsers(req.body.message, object.value.usersListening, req.params.chatID);
                     res.sendStatus(200);
                 } else {
                     res.sendStatus(500);
@@ -214,5 +261,7 @@ module.exports = function(port, db, githubAuthoriser) {
             res.status(500).send(err)});
     });
 
-    return server.listen(port);
+    return server.listen(port, function listening() {
+        console.log("Listening on %d", server.address().port);
+    });
 };
