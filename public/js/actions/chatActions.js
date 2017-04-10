@@ -35,7 +35,7 @@ export function sendMessage(message, chatID) {
     }
 }
 
-const ws = new WebSocket("ws://" + location.host + "/websocket");
+const ws = new WebSocket("wss://" + location.host + "/websocket");
 console.log(location);
 ws.onopen = function open() {
     console.log("User connected");
