@@ -27,17 +27,19 @@ module.exports = function(port, db, githubAuthoriser) {
     var websockets = [];
     var usersOnline = [];
 
-    wss.on("connection", function connection(ws) {
+    wss.on("connection", function (ws) {
 
         const location = url.parse(ws.upgradeReq.url, true);
-        const sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
-        if (sessions[sessionToken]) {
-            const user = sessions[sessionToken].user;
-            ws.userID = user._id;
-            websockets.push(ws);
-            usersOnline.push(user._id);
-            ws.send(JSON.stringify({type:"login", data:"You are logged in."}));
-
+        if (ws.upgradeReq.headers.cookie !== undefined) {
+            const sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
+            console.log(sessions);
+            if (sessions[sessionToken]) {
+                const user = sessions[sessionToken].user;
+                ws.userID = user._id;
+                websockets.push(ws);
+                usersOnline.push(user._id);
+                ws.send(JSON.stringify({type:"login", data:"You are logged in."}));
+            };
         }
 
         console.log((new Date()) + ", user connected");
@@ -53,23 +55,21 @@ module.exports = function(port, db, githubAuthoriser) {
 
 
     function pushMessageToUsers(message, usersListening, chatID, sender) {
-        console.log("usersListening is :", usersListening);
         usersListening.forEach(function(userID) {
-            console.log("User: ", userID);
-            console.log("usersOnline: ", usersOnline);
             if (usersOnline.indexOf(userID) > -1) {
-                console.log("User is online");
                 userWebSocket = websockets.find(function(wsUser) {
-                    console.log("userWebSocket found!");
                     return wsUser.userID === userID
                 })
-                console.log("Message is:", message);
                 userWebSocket.send(JSON.stringify({
                     type:"message",
                     chatID: chatID,
                     message: message,
                     sentBy: sender
-                }));
+                }), (error) => {
+                    if (error) {
+                        console.log("Error while sending message to ", userID, error);
+                    }
+                });
             }
 
 
@@ -227,7 +227,7 @@ module.exports = function(port, db, githubAuthoriser) {
         console.log(req.session, req.body);
         let chatID = userID < friendID ? userID + friendID : friendID + userID;
         let promiseObject = {user: {
-            friendID: userID,
+            _id: userID,
             name: req.session.user.name,
             avatarUrl: req.session.user.avatarUrl,
             chatID: chatID
@@ -235,7 +235,11 @@ module.exports = function(port, db, githubAuthoriser) {
         users.findAndModify(
             { _id: friendID }, //query
             [["_id", 1]], //sort
-            {$addToSet: {friends: promiseObject.user}}, //update object
+            {$addToSet: {friends: {
+                friendID: promiseObject.user._id,
+                name: promiseObject.user.name,
+                avatarUrl: req.session.user.avatar,
+                chatID: chatID}}}, //update object
             {new: true})
         .then(function(doc) {
             promiseObject.friend = {
@@ -248,24 +252,20 @@ module.exports = function(port, db, githubAuthoriser) {
         })
         .then(function(promiseObject) {
             users.findAndModify(
-                {_id: promiseObject.user.friendID},
+                {_id: promiseObject.user._id},
                 [["_id",1]],
                 {$addToSet: {friends: promiseObject.friend}}
-            );
+            ).then((obj) => res.json(obj.value.friends))
             chats.insertOne({
                     _id: chatID,
                     messages: [],
                     usersListening: [userID, friendID]
             })
-            .catch((err) => {res.sendStatus(500)});
-
         })
         .catch(function(err) {
             console.log("Caught error:", err.message);
             res.status(500).send(err)});
     });
 
-    return server.listen(port, function listening() {
-        console.log("Listening on %d", server.address().port);
-    });
+    return server.listen(port);
 };

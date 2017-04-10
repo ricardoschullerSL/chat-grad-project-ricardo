@@ -78,12 +78,12 @@ export function getUser(userID) {
             console.log(error);
         });
 };
-export function addFriend(userID, friendID) {
+export function addFriend(friendID) {
     return function(dispatch) {
         axios.put("/api/friends/addFriend", { friendID })
         .then((result) => {
             console.log("Added friend: ", result);
-            dispatch(setFriends(result.data));
+            dispatch({type:"SET_FRIENDS", payload:result.data});
         })
         .catch((error) => {
             dispatch(setError(error.message));

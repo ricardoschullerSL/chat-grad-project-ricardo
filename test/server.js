@@ -2,6 +2,7 @@ var server = require("../server/server");
 var request = require("request");
 var assert = require("chai").assert;
 var sinon = require("sinon");
+var WebSocket = require("ws");
 
 var testPort = 52684;
 var baseUrl = "http://localhost:" + testPort;
@@ -11,7 +12,7 @@ var testUser = {
     _id: "bob",
     name: "Bob Bilson",
     avatarUrl: "http://avatar.url.com/u=test",
-    friends: []
+    friends: [ 'alice', 'charles' ]
 };
 var testUser2 = {
     _id: "charlie",
@@ -23,7 +24,7 @@ var testGithubUser = {
     login: "bob",
     name: "Bob Bilson",
     avatar_url: "http://avatar.url.com/u=test",
-    friends: []
+    friends: [ 'alice', 'charles' ]
 };
 var testToken = "123123";
 var testExpiredToken = "987978";
@@ -35,6 +36,8 @@ describe("server", function() {
     var githubAuthoriser;
     var serverInstance;
     var dbCollections;
+    var dummySocket;
+    var wss;
     beforeEach(function() {
         cookieJar = request.jar();
         dbCollections = {
@@ -44,8 +47,10 @@ describe("server", function() {
                 insertOne: sinon.spy()
             },
             chats: {
+                find: sinon.stub(),
                 findOne: sinon.stub(),
                 updateOne: sinon.stub(),
+                findAndModify: sinon.stub(),
             }
         };
         db = {
@@ -54,11 +59,16 @@ describe("server", function() {
         db.collection.withArgs("users").returns(dbCollections.users);
         db.collection.withArgs("chats").returns(dbCollections.chats);
 
+        wss = {
+            on: sinon.stub()
+        }
+
         githubAuthoriser = {
             authorise: function() {},
             oAuthUri: "https://github.com/login/oauth/authorize?client_id=" + oauthClientId
         };
         serverInstance = server(testPort, db, githubAuthoriser);
+
     });
     afterEach(function() {
         serverInstance.close();
@@ -188,7 +198,7 @@ describe("server", function() {
                         _id: "bob",
                         name: "Bob Bilson",
                         avatarUrl: "http://avatar.url.com/u=test",
-                        friends: []
+                        friends: ["alice", "charles"]
                     });
                     done();
                 });
@@ -275,12 +285,8 @@ describe("server", function() {
     });
     describe("GET /api/chats/chat0", function() {
         var requestUrl = baseUrl + "/api/chats/:chat0";
-        var testChat;
         beforeEach(function() {
-            // testChat = {
-            //     findOne: sinon.stub()
-            // };
-            dbCollections.chats.findOne.returns(testChat);
+            dbCollections.chats.findOne.returns(testMessages);
         });
         it("responds with status code 401 if user not authenticated", function(done) {
             request(requestUrl, function(error, response) {
@@ -334,7 +340,6 @@ describe("server", function() {
     });
     describe("POST /api/chats/chat0", function() {
         var requestUrl = baseUrl + "/api/chats/:chat0";
-
         it("responds with status code 401 if user not authenticated", function(done) {
             request.post(requestUrl, { message:"test message" }, function(error, response) {
                 assert.equal(response.statusCode, 401);
@@ -350,7 +355,14 @@ describe("server", function() {
         });
         it("responds with status code 200 if user is authenticated", function(done) {
             authenticateUser(testUser, testToken, function() {
-                dbCollections.chats.updateOne.callsArgWith(4, null, {value:"test message"});
+                ws = new WebSocket("ws://localhost:"+ testPort + "/websocket", null, {
+                    headers:{
+                        cookie: testToken
+                    }
+                 });
+                dbCollections.chats.findAndModify.callsArgWith(4, null, {value:{
+                    usersListening:["bob"],
+                }});
                 request.post({url:requestUrl, jar: cookieJar, message:"test message"}, function(error, response) {
                     assert.equal(response.statusCode, 200);
                     done();
@@ -359,9 +371,61 @@ describe("server", function() {
         });
         it("responds with status code 500 if there was a server error", function(done) {
             authenticateUser(testUser, testToken, function() {
-                dbCollections.chats.updateOne.callsArgWith(4, "Database failure", {value:"test message"});
+                dbCollections.chats.findAndModify.callsArgWith(4, "Database failure",
+                {value:{
+                    usersListening:["bob"],
+                }});
                 request.post({url:requestUrl, jar: cookieJar, message:"test message"}, function(error, response) {
                     assert.equal(response.statusCode, 500);
+                    done();
+                });
+            });
+        });
+    });
+    describe("GET /api/friends/:userID", function() {
+        var requestUrl = baseUrl + "/api/friends/bob";
+        it("responds with list of friends if user is found", function (done) {
+            authenticateUser(testUser, testToken, function() {
+                dbCollections.users.findOne.callsArgWith(1, false, {value:{friends:testUser.friends}});
+                request.get({url:requestUrl, jar:cookieJar}, function(error, response, body) {
+                    assert.equal(body, '["alice","charles"]');
+                    done();
+                })
+            })
+        })
+        it("responds with status code 500 if there was a server error", function(done) {
+            authenticateUser(testUser, testToken, function() {
+                dbCollections.users.findOne.callsArgWith(1, "Server error!", {value:testUser.friends});
+                request.get({url:requestUrl, jar: cookieJar}, function(error, response) {
+                    assert.equal(response.statusCode, 500);
+                    done();
+                });
+            });
+        });
+    });
+    describe("GET /api/user/allchats", function() {
+        var requestUrl = baseUrl + "/api/user/allchats";
+        var allChats;
+        beforeEach(function() {
+            allChats = {
+                toArray: sinon.stub()
+            };
+            dbCollections.chats.find.returns(allChats);
+        });
+        it("responds with status code 200 if user is authenticated", function(done) {
+            authenticateUser(testUser, testToken, function() {
+                allChats.toArray.callsArgWith(0, null, testMessages);
+                request({url: requestUrl, jar: cookieJar}, function(error, response) {
+                    assert.equal(response.statusCode, 200);
+                    done();
+                });
+            });
+        });
+        it("responds with status code 500 if there was a server error", function(done) {
+            authenticateUser(testUser, testToken, function() {
+                allChats.toArray.callsArgWith(0, "Internal Server Error", null);
+                request({url: requestUrl, jar:cookieJar}, function(err, res) {
+                    assert.equal(res.statusCode, 500);
                     done();
                 });
             });

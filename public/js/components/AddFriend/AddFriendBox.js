@@ -18,9 +18,14 @@ export default class AddFriendBox extends React.Component {
 
     handleSubmit(event){
         event.preventDefault();
-        console.log(this.props.user.user._id);
-        this.props.dispatch(addFriend(this.props.user.user._id, this.state.value));
+        if (this.props.user.user.friends.filter(friend => friend.friendID === this.state.value).length > 0) {
+            this.props.dispatch({
+                type:"SET_ERROR",
+                payload:"User already in friendList"});
+        } else {
+        this.props.dispatch(addFriend(this.state.value));
         this.state = {value: ""};
+        }
     }
 
     handleChange(event) {

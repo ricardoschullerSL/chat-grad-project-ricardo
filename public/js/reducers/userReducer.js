@@ -3,10 +3,10 @@ export default function(state={
         avatarUrl: "",
         _id: "",
         name: "",
+        friends: [],
     },
     uri: "",
     error: "",
-    friends: [],
 }, action) {
     switch(action.type) {
         case "SET_USER_NAME": {
@@ -39,10 +39,20 @@ export default function(state={
                 uri: action.payload,
             }
         }
+        case "PUSH_FRIEND": {
+            let newFriendArray = state.user.friends.concat(action.payload);
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    friends: newFriendArray
+                }
+            }
+        }
         case "SET_FRIENDS": {
             return {
                 ...state,
-                friends: action.payload
+                user: {...state.user , friends: action.payload }
             }
         }
         case "SET_ERROR": {

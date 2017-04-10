@@ -34,7 +34,6 @@ export default class InputBox extends React.Component {
             <div><form class="inputBox" onSubmit={this.handleSubmit}>
             <input class="inputForm" type="text" value={this.state.value} onChange={this.handleChange}
                 placeholder="Type your message" />
-            <button>Send Message</button>
         </form></div>
         );
     }

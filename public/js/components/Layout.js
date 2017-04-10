@@ -53,8 +53,8 @@ export default class Layout extends React.Component{
                 <AddFriend />
             </div>
             <div class="bottomButtons">
-            <button>
-                <a href={this.props.user.uri}>Log In</a></button>
+                <a href={this.props.user.uri}>
+            Log In</a>
                 <button onClick={this.fetchAllChats.bind(this)}>Fetch Messages</button>
 
 

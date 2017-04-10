@@ -17,7 +17,7 @@ export default class FriendWindow extends React.Component{
     render(){
         return (
         <div>
-            <FriendList friends={this.props.user.friends}
+            <FriendList friends={this.props.user.user.friends}
                 activeChatID={this.props.activeChatID}/>
         </div>
     );
