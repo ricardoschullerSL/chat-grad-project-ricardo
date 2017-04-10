@@ -1,22 +1,22 @@
-const express = require("express");
-const http = require("http");
-const url = require("url");
-const WebSocket = require("ws");
-const cookieParser = require("cookie-parser");
-const bodyParser = require("body-parser");
+var http = require("http");
+var express = require("express");
+var url = require("url");
+var WebSocket = require("ws");
+var cookieParser = require("cookie-parser");
+var bodyParser = require("body-parser");
 
 
 
 module.exports = function(port, db, githubAuthoriser) {
-    const app = express();
+    var app = express();
 
     app.use(bodyParser.json());
     app.use(express.static("public"));
     app.use(cookieParser());
 
 
-    const server = http.createServer(app);
-    const wss = new WebSocket.Server({
+    var server = http.createServer(app);
+    var wss = new WebSocket.Server({
         server: server,
         path: "/websocket"
      });
@@ -29,12 +29,12 @@ module.exports = function(port, db, githubAuthoriser) {
 
     wss.on("connection", function (ws) {
 
-        const location = url.parse(ws.upgradeReq.url, true);
+        var location = url.parse(ws.upgradeReq.url, true);
         if (ws.upgradeReq.headers.cookie !== undefined) {
-            const sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
+            var sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
             console.log(sessions);
             if (sessions[sessionToken]) {
-                const user = sessions[sessionToken].user;
+                var user = sessions[sessionToken].user;
                 ws.userID = user._id;
                 websockets.push(ws);
                 usersOnline.push(user._id);
