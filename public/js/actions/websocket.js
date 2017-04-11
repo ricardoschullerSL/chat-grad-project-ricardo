@@ -1,6 +1,6 @@
 import store from "../store";
 
-const ws = new WebSocket("ws://" + location.host + "/websocket");
+const ws = new WebSocket("wss://" + location.host + "/websocket");
 ws.onopen = function open() {
     console.log("User connected");
 }
