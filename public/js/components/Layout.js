@@ -1,13 +1,14 @@
 import React from "react";
 import { connect } from "react-redux";
-import { addFriend, userOath, getFriends } from "../actions/userActions";
+import { addFriend, userOath, getFriends, getOnlineUsers } from "../actions/userActions";
 import { fetchAllChats, receiveMessages } from "../actions/chatActions";
 
-import AddFriend from "./AddFriend";
-import Footer from "./Footer";
-import FriendWindow from "./FriendWindow";
-import Header from "./Header";
-import ChatWindow from "./ChatWindow";
+import AddFriend from "./AddFriend.js";
+import Footer from "./Footer.js";
+import FriendWindow from "./FriendWindow.js";
+import Header from "./Header.js";
+import ChatWindow from "./ChatWindow.js";
+import OnlineUsersWindow from "./OnlineUsersWindow.js"
 import styles from "./layout.css";
 
 import store from "../store";
@@ -27,31 +28,34 @@ export default class Layout extends React.Component{
     componentWillMount(){
         if(this.props.user.user !== null){
             this.props.dispatch(fetchAllChats());
+            this.props.dispatch(getOnlineUsers());
         }
     }
     fetchAllChats() {
         this.props.dispatch(fetchAllChats());
     }
-    addFriend() {
-        this.props.dispatch(addFriend(this.props.user.user._id,
-            {friendID:"ricksanchez"}));
-    }
 
     render(){
         return(
             <div>
+            <div>
                 <Header user={this.props.user.user}/>
-                <div class="bodyContainer">
+            </div>
+            <div class="bodyContainer">
+                <div class="friendListContainer">
+                    <FriendWindow friends={this.props.user.friends} />
+                    <div>
+                        <AddFriend />
+                    </div>
+                </div>
                     <div class="chatWindowContainer">
                 <ChatWindow message="Test Message" />
             </div>
-                <div class="friendListContainer">
-                    <FriendWindow friends={this.props.user.friends} />
+                <div class="onlineUsersWindow">
+                    <OnlineUsersWindow onlineUsers={this.props.user.onlineUsers} />
                 </div>
-            </div>
-            <div>
-                <AddFriend />
-            </div>
+        </div>
+
             <div class="bottomButtons">
                 <a href={this.props.user.uri}>
             Log In</a>
@@ -61,7 +65,7 @@ export default class Layout extends React.Component{
                 <span> Error: {this.props.user.error} </span>
                 <Footer />
             </div>
-            </div>
+        </div>
         );
     }
 }

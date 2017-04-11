@@ -1,0 +1,12 @@
+.onlineUsersListTitle {
+    font-size: 32;
+}
+
+.onlineUsersList {
+    list-style-type: none;
+    margin: 0 0 0 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 600px;
+}

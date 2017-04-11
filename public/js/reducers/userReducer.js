@@ -7,6 +7,7 @@ export default function(state={
     },
     uri: "",
     error: "",
+    onlineUsers: [],
 }, action) {
     switch(action.type) {
         case "SET_USER_NAME": {
@@ -53,6 +54,12 @@ export default function(state={
             return {
                 ...state,
                 user: {...state.user , friends: action.payload }
+            }
+        }
+        case "SET_ONLINE_USERS": {
+            return {
+                ...state,
+                onlineUsers: action.payload
             }
         }
         case "SET_ERROR": {

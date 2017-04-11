@@ -56,6 +56,13 @@ export function setFriends(friends) {
     }
 }
 
+export function setOnlineUsers(onlineUsers) {
+    return {
+        type: "SET_ONLINE_USERS",
+        payload: onlineUsers
+    }
+}
+
 export function getFriends(userID) {
     return function(dispatch) {
         axios.get("/api/friends/" + userID)
@@ -68,6 +75,30 @@ export function getFriends(userID) {
 
     };
 
+}
+
+export function getOnlineUsers() {
+    return function(dispatch) {
+        axios.get("/api/onlineusers")
+        .then((result) => {
+            dispatch(setOnlineUsers(result.data));
+        })
+        .catch((error) => {
+            dispatch(setError(error.message));
+        })
+    }
+}
+
+export function getRegisteredUsers() {
+    return function(dispatch) {
+        axios.get("/api/users")
+        .then((result) => {
+            dispatch(setRegisteredUsers(result.data));
+        })
+        .catch((error) => {
+            dispatch(setError(error.message));
+        })
+    }
 }
 export function getUser(userID) {
     return axios.get("/api/users")

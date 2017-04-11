@@ -12,8 +12,9 @@ export default class FriendWindow extends React.Component{
             return (
                 <div class="friendWindow">
                     <ul class="friendList">
+                        <li class="friend">Friend List</li>
                         {this.props.friends.map((friend, index) =>
-                        <li key={index}><Friend friend={friend} /></li>)}
+                        <li key={index + 1}><Friend friend={friend} /></li>)}
                     </ul>
                 </div>
             )

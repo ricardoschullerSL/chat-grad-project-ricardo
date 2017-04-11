@@ -27,17 +27,29 @@ module.exports = function(port, db, githubAuthoriser) {
     var websockets = [];
     var usersOnline = [];
 
-    wss.on("connection", function (ws) {
+    wss.broadcast = function broadcast(data) {
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(data);
+            }
+        });
+    };
 
-        var location = url.parse(ws.upgradeReq.url, true);
+    wss.on("connection", function (ws) {
         if (ws.upgradeReq.headers.cookie !== undefined) {
             var sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
-            console.log(sessions);
             if (sessions[sessionToken]) {
                 var user = sessions[sessionToken].user;
                 ws.userID = user._id;
                 websockets.push(ws);
                 usersOnline.push(user._id);
+
+                var users = usersOnline.map(function(userID) {
+                    return {
+                        userID: userID
+                    }
+                });
+                wss.broadcast(JSON.stringify({type:"onlineusersupdate", users: users}));
                 ws.send(JSON.stringify({type:"login", data:"You are logged in."}));
             };
         }
@@ -45,12 +57,28 @@ module.exports = function(port, db, githubAuthoriser) {
         console.log((new Date()) + ", user connected");
         ws.on("message", function incoming(message) {
             console.log("Received message: ", message);
+            var data = JSON.parse(message.data)
+            if (data.type === "logout") {
+                console.log("logout succesfull");
+
+            }
         });
 
-        ws.on("close", function close(ws) {
-            console.log((new Date()) + ", user disconnected");
+        ws.onclose = function () {
+            if (ws.upgradeReq.headers.cookie !== undefined) {
+                var sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
+                if (sessions[sessionToken]) {
+                    var user = sessions[sessionToken].user;
+                    var userIndex = usersOnline.indexOf(user._id);
+                    var newUsersOnline = usersOnline.splice(userIndex, 1);
 
-        });
+                    var users = newUsersOnline.map(function(userID) {
+                        return { userID: userID }
+                    });
+                    wss.broadcast(JSON.stringify({type:"onlineusersupdate", users: users}));
+                };
+            };
+        };
     });
 
 
@@ -158,6 +186,19 @@ module.exports = function(port, db, githubAuthoriser) {
             }
         });
     });
+
+    app.get("/api/onlineusers", function(res, res) {
+        // return array of online users
+        if (usersOnline.length > 0) {
+            res.json(usersOnline.map(function(userID) {
+                return {
+                    userID: userID
+                }
+            }));
+        } else {
+            res.sendStatus(500);
+        }
+    })
 
     app.get("/api/user/allchats", function(req, res) {
         //return all chats belonging to user
