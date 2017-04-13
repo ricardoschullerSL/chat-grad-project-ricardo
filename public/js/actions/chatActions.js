@@ -8,6 +8,11 @@ export function changeActiveChatID(chatID) {
         };
 };
 
+export function scrollMessageWindowToBottom() {
+    var chatWindow = document.getElementById("messageWindow");
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+};
+
 export function fetchAllChats() {
     console.log("FetchAllChats called");
     return function (dispatch) {
@@ -15,10 +20,13 @@ export function fetchAllChats() {
         .then((result) => {
             console.log("All messages result is,", result);
             let chat = {};
+            let chatList = []
             for (let i = 0; i < result.data.length; i++) {
                 chat[result.data[i].chat._id] = result.data[i].chat;
+                chatList.push(result.data[i].chat._id);
             }
             dispatch({type:"RECEIVE_ALL_CHATS", payload: chat});
+            dispatch({type:"SET_CHAT_LIST", payload:chatList});
         });
     };
 };

@@ -20,3 +20,8 @@
     position: absolute;
     bottom: 20px;
 }
+
+.logIn {
+    font-size: 600%;
+    font-weight:bolder;
+}

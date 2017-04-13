@@ -5,6 +5,8 @@ export default function(state={
         name: "",
         friends: [],
     },
+    loggedIn: false,
+    showFriends: true,
     uri: "",
     error: "",
     onlineUsers: [],
@@ -40,6 +42,12 @@ export default function(state={
                 uri: action.payload,
             }
         }
+        case "SET_LOGGED_IN": {
+            return {
+                ...state,
+                loggedIn: action.payload
+            }
+        }
         case "PUSH_FRIEND": {
             let newFriendArray = state.user.friends.concat(action.payload);
             return {
@@ -66,6 +74,12 @@ export default function(state={
             return {
                 ...state,
                 error: action.payload
+            }
+        }
+        case "SET_SHOW_FRIENDS": {
+            return {
+                ...state,
+                showFriends: action.payload
             }
         }
     }

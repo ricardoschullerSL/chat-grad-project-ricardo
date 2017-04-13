@@ -35,37 +35,49 @@ export default class Layout extends React.Component{
         this.props.dispatch(fetchAllChats());
     }
 
+    toggleShowContacts() {
+        this.props.dispatch({type:"SET_SHOW_FRIENDS", payload:!this.props.user.showFriends});
+    }
+
     render(){
-        return(
-            <div>
-            <div>
-                <Header user={this.props.user.user}/>
-            </div>
-            <div class="bodyContainer">
-                <div class="friendListContainer">
-                    <FriendWindow friends={this.props.user.friends} />
-                    <div>
-                        <AddFriend />
-                    </div>
-                </div>
-                    <div class="chatWindowContainer">
-                <ChatWindow message="Test Message" />
-            </div>
-                <div class="onlineUsersWindow">
-                    <OnlineUsersWindow onlineUsers={this.props.user.onlineUsers} />
-                </div>
-        </div>
-
-            <div class="bottomButtons">
-                <a href={this.props.user.uri}>
+        if (this.props.user.loggedIn === false) {
+            return (
+                <a class="logIn" href={this.props.user.uri}>
             Log In</a>
-                <button onClick={this.fetchAllChats.bind(this)}>Fetch Messages</button>
-
-
-                <span> Error: {this.props.user.error} </span>
-                <Footer />
+            )
+        } else {
+            return(
+                <div>
+                <div>
+                    <Header user={this.props.user.user}/>
+                </div>
+                <div class="bodyContainer">
+                    <div class="friendListContainer">
+                        <FriendWindow friends={this.props.user.friends} />
+                        <div>
+                            <AddFriend />
+                        </div>
+                        <div>
+                            <button onClick={this.toggleShowContacts.bind(this)}>Toggle Contacts/Chats</button>
+                        </div>
+                    </div>
+                        <div class="chatWindowContainer">
+                    <ChatWindow message="Test Message" />
+                </div>
+                    <div class="onlineUsersWindow">
+                        <OnlineUsersWindow onlineUsers={this.props.user.onlineUsers} />
+                    </div>
             </div>
-        </div>
-        );
+
+                <div class="bottomButtons">
+                    <button onClick={this.fetchAllChats.bind(this)}>Fetch Messages</button>
+
+
+                    <span> Error: {this.props.user.error} </span>
+                    <Footer />
+                </div>
+            </div>
+            );
+        }
     }
 }

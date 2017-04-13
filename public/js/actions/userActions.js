@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import {FetchAllChats} from "./chatActions.js";
 
 export function fetchUser() {
     return {
@@ -115,28 +115,45 @@ export function addFriend(friendID) {
         .then((result) => {
             console.log("Added friend: ", result);
             dispatch({type:"SET_FRIENDS", payload:result.data});
+            fetchAllChats();
+
         })
         .catch((error) => {
+            console.log(error);
             dispatch(setError(error.message));
         })
     };
 };
 
+export function getFriendInfo(friendID) {
+    return function(dispatch) {
+        axios.get("/api/friends/"+friendID+"/userinfo")
+        .then((result) => {
+            console.log("Got friend info of", result);
+            dispatch({type:"UPDATE_FRIEND_INFO", payload:result.data});
+        })
+        .catch((error) => {
+            dispatch(setError("Error updating friend info"));
+        })
+    }
+}
+
 export function userOath() {
     console.log("Authentication started...");
     return function(dispatch) {
-        console.log("Before the GET request");
         axios.get("/api/user")
         .then(function(userResult) {
             console.log("User Result is :", userResult.data);
+            dispatch({type:"SET_LOGGED_IN", payload: true});
             dispatch(setUser(userResult.data));
             dispatch(setFriends(userResult.data.friends));
+
         })
         .catch((err) => {
-            console.log("Error": err);
             axios.get("/api/oauth/uri").then(function(result) {
                 console.log("Got authentication token");
                 dispatch({type:"SET_USER_URI", payload:result.data.uri});
+
             })
             .catch((err) => {console.log("Error during uri request");});
             console.log("End of authentication");

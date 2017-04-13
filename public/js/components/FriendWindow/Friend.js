@@ -3,6 +3,7 @@ import styles from "./friend.css";
 import { connect } from "react-redux";
 import store from "../../store.js";
 
+
 @connect()
 export default class Friend extends React.Component {
     changeActiveChat() {
@@ -13,7 +14,7 @@ export default class Friend extends React.Component {
         return (
             <div class="friend" onClick={this.changeActiveChat.bind(this)}>
                 <img class="friendAvatar" src={this.props.friend.avatarUrl}></img>
-                <span class="name">{this.props.friend.name}</span>
+                <span class="name">{this.props.friend._id}</span>
             </div>
         )
     }

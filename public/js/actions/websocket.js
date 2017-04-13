@@ -1,6 +1,7 @@
 import store from "../store";
+import {getFriends} from "./userActions.js";
 
-const ws = new WebSocket("wss://" + location.host + "/websocket");
+const ws = new WebSocket("ws://" + location.host + "/websocket");
 ws.onopen = function open() {
     console.log("User connected");
 }
@@ -23,10 +24,17 @@ ws.onmessage = function incoming(e) {
             payload: data.users
         })
     }
+    if (data.type === "addedasfriend") {
+        getFriends(store.user.user._id);
+    }
 };
 
 window.onbeforeunload = function(e) {
     ws.send(JSON.stringify({type:"logout", userID:store.user.user._id}))
 }
+
+setInterval(function () {
+    ws.send("Just keeping the socket open");
+}, 25000);
 
 export default ws;

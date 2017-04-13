@@ -1,12 +1,15 @@
 import React from "react";
-import FriendList from "./FriendWindow/FriendList.js"
-import { getFriends } from "../actions/userActions.js"
+import FriendList from "./FriendWindow/FriendList.js";
+import ChatList from "./FriendWindow/ChatList.js";
+import { getFriends } from "../actions/userActions.js";
 import { connect } from "react-redux";
 
 @connect((store) => {
     return {
-        user: store.user,
+        friends: store.user.user.friends,
         activeChatID: store.chat.activeChatID,
+        chatList: store.chat.chatList,
+        showFriends: store.user.showFriends
     }
 })
 export default class FriendWindow extends React.Component{
@@ -15,11 +18,18 @@ export default class FriendWindow extends React.Component{
     }
 
     render(){
-        return (
-        <div>
-            <FriendList friends={this.props.user.user.friends}
-                activeChatID={this.props.activeChatID}/>
-        </div>
-    );
+        if (this.props.showFriends) {
+            return (
+                <div>
+                    <FriendList friends={this.props.friends}/>
+                </div>
+            )
+        } else {
+            return (
+                <div>
+                    <ChatList chatList={this.props.chatList} />
+                </div>
+            )
+        }
     }
 }

@@ -1,9 +1,9 @@
 var server = require("./server/server");
 var oAuthGithub = require("./server/oauth-github");
 var MongoClient = require("mongodb").MongoClient;
-// var credentials = require("./MongoDB/credentials.js");
+var credentials = require("./MongoDB/credentials.js");
 
-var creds = {};
+var creds = credentials();
 
 var port = process.env.PORT || 9090;
 var dbUri = process.env.DB_URI || creds.DB_URI;

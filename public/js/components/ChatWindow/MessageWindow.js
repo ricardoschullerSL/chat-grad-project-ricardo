@@ -16,13 +16,17 @@ import styles from "./chatwindow.css"
 }
 })
 export default class MessageWindow extends React.Component{
+    componentDidUpdate(){
+        var chatWindow = document.getElementById("messageWindow");
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
 
     render(){
 
-        if (this.props.chats !== undefined) {
+        if (this.props.activeChatID !== "") {
             return (
-                <div class="messageWindow">
-                    <span>ActiveChatID is {this.props.activeChatID}</span>
+                <div class="messageWindow" id="messageWindow">
+
                     <ul class="messageList">
                     {this.props.chats[this.props.activeChatID].messages.map((message, index) =>
                     <li key={index}><Message text={message.text} sentBy={message.sentBy} /></li>
@@ -32,7 +36,9 @@ export default class MessageWindow extends React.Component{
             );
         } else {
             return (
-                <div> <Message message="No messages found" /></div>
+                <div class="messageWindow" id="messageWindow"> <ul class="messageList">
+                    <li><Message text="No messages found" sentBy="Error" /></li>
+                </ul></div>
             );
         }
     }

@@ -4,7 +4,11 @@ var url = require("url");
 var WebSocket = require("ws");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
+var cookie = require("cookie");
+var ObjectID = require("mongodb").ObjectID;
 
+
+var chatCutOff = 50;
 
 
 module.exports = function(port, db, githubAuthoriser) {
@@ -24,7 +28,6 @@ module.exports = function(port, db, githubAuthoriser) {
     var users = db.collection("users");
     var chats = db.collection("chats");
     var sessions = {};
-    var websockets = [];
     var usersOnline = [];
 
     wss.broadcast = function broadcast(data) {
@@ -37,45 +40,54 @@ module.exports = function(port, db, githubAuthoriser) {
 
     wss.on("connection", function (ws) {
         if (ws.upgradeReq.headers.cookie !== undefined) {
-            var sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
+            var cookies = cookie.parse(ws.upgradeReq.headers.cookie);
+            var sessionToken = cookies.sessionToken;
+            console.log(sessionToken);
             if (sessions[sessionToken]) {
                 var user = sessions[sessionToken].user;
-                ws.userID = user._id;
-                websockets.push(ws);
-                usersOnline.push(user._id);
+                sessions[sessionToken].websocket = ws;
+                usersOnline.push({userID:user._id, websocket:ws});
 
-                var users = usersOnline.map(function(userID) {
+                var users = usersOnline.map(function(user) {
                     return {
-                        userID: userID
+                        userID: user.userID
                     }
                 });
-                wss.broadcast(JSON.stringify({type:"onlineusersupdate", users: users}));
-                ws.send(JSON.stringify({type:"login", data:"You are logged in."}));
+                console.log(users);
+                wss.broadcast(JSON.stringify({
+                    type:"onlineusersupdate",
+                    users: users
+                }));
+                ws.send(JSON.stringify({
+                    type:"login",
+                    data:"You are logged in."
+                }));
             };
         }
 
         console.log((new Date()) + ", user connected");
         ws.on("message", function incoming(message) {
-            console.log("Received message: ", message);
-            var data = JSON.parse(message.data)
-            if (data.type === "logout") {
-                console.log("logout succesfull");
-
-            }
+            console.log("User sent: ", message);
         });
 
         ws.onclose = function () {
             if (ws.upgradeReq.headers.cookie !== undefined) {
-                var sessionToken = ws.upgradeReq.headers.cookie.toString().slice(-40);
+                var sessionToken = cookie.parse(ws.upgradeReq.headers.cookie).sessionToken;
                 if (sessions[sessionToken]) {
                     var user = sessions[sessionToken].user;
-                    var userIndex = usersOnline.indexOf(user._id);
-                    var newUsersOnline = usersOnline.splice(userIndex, 1);
-
-                    var users = newUsersOnline.map(function(userID) {
-                        return { userID: userID }
+                    var newUsersOnline = usersOnline.filter(function(usr) {
+                        return usr.userID !== user._id;
                     });
-                    wss.broadcast(JSON.stringify({type:"onlineusersupdate", users: users}));
+
+                    var users = newUsersOnline.map(function(user) {
+                        return { userID: user.userID }
+                    });
+                    usersOnline = newUsersOnline;
+                    sessions[sessionToken] = null;
+                    wss.broadcast(JSON.stringify({
+                        type:"onlineusersupdate",
+                        users: users
+                    }));
                 };
             };
         };
@@ -84,11 +96,10 @@ module.exports = function(port, db, githubAuthoriser) {
 
     function pushMessageToUsers(message, usersListening, chatID, sender) {
         usersListening.forEach(function(userID) {
-            if (usersOnline.indexOf(userID) > -1) {
-                userWebSocket = websockets.find(function(wsUser) {
-                    return wsUser.userID === userID
-                })
-                userWebSocket.send(JSON.stringify({
+            var user = usersOnline.find((user) => {
+                return user.userID === userID});
+            if (user !== undefined) {
+                user.websocket.send(JSON.stringify({
                     type:"message",
                     chatID: chatID,
                     message: message,
@@ -187,12 +198,13 @@ module.exports = function(port, db, githubAuthoriser) {
         });
     });
 
+
     app.get("/api/onlineusers", function(res, res) {
         // return array of online users
         if (usersOnline.length > 0) {
-            res.json(usersOnline.map(function(userID) {
+            res.json(usersOnline.map(function(user) {
                 return {
-                    userID: userID
+                    userID: user.userID
                 }
             }));
         } else {
@@ -204,8 +216,12 @@ module.exports = function(port, db, githubAuthoriser) {
         //return all chats belonging to user
         chats.find({usersListening: req.session.user._id})
         .toArray(function(err, docs) {
+            console.log(docs);
             if (!err) {
                 res.json(docs.map(function(chat) {
+                    if (chat.messages.length > chatCutOff) {
+                        chat.messages.splice(0, chat.messages.length - chatCutOff);
+                    }
                     return { chat }}));
             } else {
                 res.sendStatus(500);
@@ -228,15 +244,14 @@ module.exports = function(port, db, githubAuthoriser) {
 
     app.post("/api/chats/:chatID", function(req, res) {
         // Add message to chat with _id: chatID
-        chats.findAndModify(
-            { _id: req.params.chatID }, //query
-            [["_id", 1]], //sort
+
+        chats.findOneAndUpdate(
+            {"_id": req.params.chatID}, //query
             {$push: {messages: {text:req.body.message,
                                 sentBy:req.session.user._id}}}, //update object
-            {new: true}, //options
+            {returnOriginal: false},
             function(err, object) { //callback
                 if(!err) {
-                    console.log(req.body.message, object.value.usersListening);
                     pushMessageToUsers(req.body.message, object.value.usersListening,
                          req.params.chatID, req.session.user._id);
                     res.sendStatus(200);
@@ -261,51 +276,62 @@ module.exports = function(port, db, githubAuthoriser) {
         );
     });
 
+    app.get("/api/friends/:friendID/userinfo", function(req, res) {
+        users.findOne({
+            _id: req.params.friendID
+        }, function(err, doc) {
+            if(!err) {
+                console.log(doc.value);
+                var userinfo = {
+                    name: doc.value.user.name,
+                    avatarUrl: doc.value.user.avatarUrl
+                };
+                res.json(userinfo);
+
+            } else {
+                res.sendStatus(500);
+            }
+        });
+    });
+
     app.put("/api/friends/addFriend", function(req, res) {
         // Add new friend to userID.friends
-        let userID = req.session.user._id;
-        let friendID = req.body.friendID;
-        console.log(req.session, req.body);
-        let chatID = userID < friendID ? userID + friendID : friendID + userID;
-        let promiseObject = {user: {
-            _id: userID,
-            name: req.session.user.name,
-            avatarUrl: req.session.user.avatarUrl,
-            chatID: chatID
-        }};
-        users.findAndModify(
-            { _id: friendID }, //query
-            [["_id", 1]], //sort
+        var userID = req.session.user._id;
+        var friendID = req.body.friendID;
+        var chatID = userID < friendID ? userID +"+"+ friendID : friendID +"+"+ userID;
+
+        users.findOneAndUpdate({_id:friendID},
             {$addToSet: {friends: {
-                friendID: promiseObject.user._id,
-                name: promiseObject.user.name,
-                avatarUrl: req.session.user.avatar,
-                chatID: chatID}}}, //update object
-            {new: true})
-        .then(function(doc) {
-            promiseObject.friend = {
-                    friendID: doc.value._id,
-                    name: doc.value.name,
+                _id:userID,
+                avatarUrl: req.session.user.avatarUrl,
+                name: req.session.user.name,
+                chatID: chatID
+            }}
+        })
+        .then((doc) => {
+            users.findOneAndUpdate({_id:userID},
+                {$addToSet: {friends: {
+                    _id:doc.value._id,
                     avatarUrl: doc.value.avatarUrl,
+                    name: doc.value.name,
                     chatID: chatID
                 }
-            return promiseObject;
-        })
-        .then(function(promiseObject) {
-            users.findAndModify(
-                {_id: promiseObject.user._id},
-                [["_id",1]],
-                {$addToSet: {friends: promiseObject.friend}}
-            ).then((obj) => res.json(obj.value.friends))
-            chats.insertOne({
+            }})
+            .then(() => {
+                chats.insertOne({
                     _id: chatID,
                     messages: [],
                     usersListening: [userID, friendID]
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
             })
         })
-        .catch(function(err) {
-            console.log("Caught error:", err.message);
-            res.status(500).send(err)});
+        .catch((err) => {
+            console.log("Error: " + err);
+            res.status(500).send(err);
+        })
     });
 
     return server.listen(port);

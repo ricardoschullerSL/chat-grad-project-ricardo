@@ -2,7 +2,7 @@ import React from "react";
 import Friend from "./Friend.js";
 import styles from "./friend.css";
 
-export default class FriendWindow extends React.Component{
+export default class FriendList extends React.Component{
     constructor(props){
         super(props);
     }
